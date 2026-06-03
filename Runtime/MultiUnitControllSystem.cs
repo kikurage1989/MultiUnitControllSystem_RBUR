@@ -23,18 +23,44 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected Controller_Base reverser2e;
         [SerializeField] protected Controller_Base zengoSW2e;
 
-        protected int[] notchSegment1e = new int[1];
-        protected float[] notchPosition1e = new float[1];
-        protected float[] notchNormPosition1e = new float[1];
-        protected int[] notchSegment2e = new int[1];
-        protected int[] notchSegment1e = new int[1];
-        protected float[] notchPosition1e = new float[1];
-        protected float[] notchNormPosition1e = new float[1];
+        [SerializeField] protected int[] notchSegment1e = new int[1];
+        [SerializeField] protected float[] notchPosition1e = new float[1];
+        [SerializeField] protected float[] notchNormPosition1e = new float[1];
+        [SerializeField] protected int[] brakeSegment1e = new int[1];
+        [SerializeField] protected float[] brakePosition1e = new float[1];
+        [SerializeField] protected float[] brakeNormPosition1e = new float[1];
+        [SerializeField] protected int[] reverserSegment1e = new int[1];
+        [SerializeField] protected int[] zengoSwSegment1e = new int[1];
+
+        [SerializeField] protected int[] notchSegment2e = new int[1];
+        [SerializeField] protected float[] notchPosition2e = new float[1];
+        [SerializeField] protected float[] notchNormPosition2e = new float[1];
+        [SerializeField] protected int[] brakeSegment2e = new int[1];
+        [SerializeField] protected float[] brakePosition2e = new float[1];
+        [SerializeField] protected float[] brakeNormPosition2e = new float[1];
+        [SerializeField] protected int[] reverserSegment2e = new int[1];
+        [SerializeField] protected int[] zengoSwSegment2e = new int[1];
 
         protected bool isInit = false;
         protected virtual void Start()
         {
-            
+            notchSegment1e = notchLever1e.currentSegment_Exposed;
+            notchPosition1e = notchLever1e.controllerPosition_Exposed;
+            notchNormPosition1e = notchLever1e.currentNormalizePosition_Exposed;
+            brakeSegment1e = brakeLever1e.currentSegment_Exposed;
+            brakePosition1e = brakeLever1e.controllerPosition_Exposed;
+            brakeNormPosition1e = brakeLever1e.currentNormalizePosition_Exposed;
+            reverserSegment1e = reverser1e.currentSegment_Exposed;
+            zengoSwSegment1e = zengoSW1e.currentSegment_Exposed;
+
+            // notchSegment2e = new int[1];
+            // notchPosition2e = new float[1];
+            // notchNormPosition2e = new float[1];
+            // brakeSegment2e = new int[1];
+            // brakePosition2e = new float[1];
+            // brakeNormPosition2e = new float[1];
+            // reverserSegment2e = new int[1];
+            // zengoSwSegment2e = new int[1];
             isInit = true;
         }
 
