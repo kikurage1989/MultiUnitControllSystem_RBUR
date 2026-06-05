@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -23,23 +24,23 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected Controller_Base reverser2e;
         [SerializeField] protected Controller_Base zengoSW2e;
 
-        [SerializeField] protected int[] notchSegment1e = new int[1];
-        [SerializeField] protected float[] notchPosition1e = new float[1];
-        [SerializeField] protected float[] notchNormPosition1e = new float[1];
-        [SerializeField] protected int[] brakeSegment1e = new int[1];
-        [SerializeField] protected float[] brakePosition1e = new float[1];
-        [SerializeField] protected float[] brakeNormPosition1e = new float[1];
-        [SerializeField] protected int[] reverserSegment1e = new int[1];
-        [SerializeField] protected int[] zengoSwSegment1e = new int[1];
+        protected int[] notchSegment1e = new int[1];
+        protected float[] notchPosition1e = new float[1];
+        protected float[] notchNormPosition1e = new float[1];
+        protected int[] brakeSegment1e = new int[1];
+        protected float[] brakePosition1e = new float[1];
+        protected float[] brakeNormPosition1e = new float[1];
+        protected int[] reverserSegment1e = new int[1];
+        protected int[] zengoSwSegment1e = new int[1];
 
-        [SerializeField] protected int[] notchSegment2e = new int[1];
-        [SerializeField] protected float[] notchPosition2e = new float[1];
-        [SerializeField] protected float[] notchNormPosition2e = new float[1];
-        [SerializeField] protected int[] brakeSegment2e = new int[1];
-        [SerializeField] protected float[] brakePosition2e = new float[1];
-        [SerializeField] protected float[] brakeNormPosition2e = new float[1];
-        [SerializeField] protected int[] reverserSegment2e = new int[1];
-        [SerializeField] protected int[] zengoSwSegment2e = new int[1];
+        protected int[] notchSegment2e = new int[1];
+        protected float[] notchPosition2e = new float[1];
+        protected float[] notchNormPosition2e = new float[1];
+        protected int[] brakeSegment2e = new int[1];
+        protected float[] brakePosition2e = new float[1];
+        protected float[] brakeNormPosition2e = new float[1];
+        protected int[] reverserSegment2e = new int[1];
+        protected int[] zengoSwSegment2e = new int[1];
 
         protected bool isInit = false;
         protected virtual void Start()
@@ -53,15 +54,15 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             reverserSegment1e = reverser1e.currentSegment_Exposed;
             zengoSwSegment1e = zengoSW1e.currentSegment_Exposed;
 
-            // notchSegment2e = new int[1];
-            // notchPosition2e = new float[1];
-            // notchNormPosition2e = new float[1];
-            // brakeSegment2e = new int[1];
-            // brakePosition2e = new float[1];
-            // brakeNormPosition2e = new float[1];
-            // reverserSegment2e = new int[1];
-            // zengoSwSegment2e = new int[1];
-            isInit = true;
+            notchSegment2e = notchLever2e.currentSegment_Exposed;
+            notchPosition2e = notchLever2e.controllerPosition_Exposed;
+            notchNormPosition2e = notchLever2e.currentNormalizePosition_Exposed;
+            brakeSegment2e = brakeLever2e.currentSegment_Exposed;
+            brakePosition2e = brakeLever2e.controllerPosition_Exposed;
+            brakeNormPosition2e = brakeLever2e.currentNormalizePosition_Exposed;
+            reverserSegment2e = reverser2e.currentSegment_Exposed;
+            zengoSwSegment2e = zengoSW2e.currentSegment_Exposed;
+            
         }
 
         protected virtual void Update()
@@ -99,6 +100,15 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 {
                 }
             }
+        }
+        
+        public void ChangeZengoSwEvent()
+        {
+            SendCustomEventDelayedFrames(nameof(ChangeZengoSwProcess), 1);
+        }
+        public void ChangeZengoSwProcess()
+        {
+            Debug.Log("ChangeZengoSw:1e" + zengoSwSegment1e[0] + " 2e:" + zengoSwSegment2e[0]);
         }
     }
 }
