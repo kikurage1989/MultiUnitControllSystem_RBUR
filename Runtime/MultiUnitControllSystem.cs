@@ -35,7 +35,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected float[] brakePosition1e = new float[1];
         protected float[] brakeNormPosition1e = new float[1];
         protected int[] reverserSegment1e = new int[1];
-        protected int[] zengoSwSegment1e = new int[1];
+        public int[] zengoSwSegment1e = new int[1];
 
         protected int[] notchSegment2e = new int[1];
         protected float[] notchPosition2e = new float[1];
@@ -44,7 +44,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected float[] brakePosition2e = new float[1];
         protected float[] brakeNormPosition2e = new float[1];
         protected int[] reverserSegment2e = new int[1];
-        protected int[] zengoSwSegment2e = new int[1];
+        public int[] zengoSwSegment2e = new int[1];
 
         [System.NonSerialized] public int[] transport_int = new int[5];
         //予約分
@@ -92,16 +92,21 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool[] transport_bool_from1e = new bool[8];
         protected bool[] transport_bool_fromFront_from1e = new bool[12];
         protected bool[] transport_bool_fromBack_from1e = new bool[12];
+        protected int[] zengoSwSegment_from1e = new int[1];
 
         protected int[] transport_int_from2e = new int[5];
         protected float[] transport_float_from2e = new float[8];
         protected bool[] transport_bool_from2e = new bool[8];
         protected bool[] transport_bool_fromFront_from2e = new bool[12];
         protected bool[] transport_bool_fromBack_from2e = new bool[12];
+        protected int[] zengoSwSegment_from2e = new int[1];
         
         protected bool[] isConnectedOtherCar = new bool[2]; //通信接続がされているかのフラグ 0:1エンド側 1:2エンド側
         protected bool[] isConnectedTo2eCoupler = new bool[2]; //接続した相手車両の接続カプラが2エンド側か　Falseで1エンド側 0:自車1エンド側 1:自車2エンド側 isConnectedOtherCarと組み合わせること
 
+        [SerializeField] protected int notchLocal; //ノッチハンドルから読み取り
+        [SerializeField] protected int notchPos; //力行出力計算に使用する、処理済のノッチ数
+        [SerializeField] protected byte dataDirectionMode = 0; //送受信モード 
 
         protected bool isInit = false;
         protected virtual void Start()
@@ -130,6 +135,13 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected virtual void Update()
         {
             if(!isInit) return;
+            //自車送受信モード確認
+            
+            //ノッチハンドル位置読み取り
+            if(zengoSwSegment1e[0] == 2) notchLocal = notchSegment1e[0];
+            else if(zengoSwSegment2e[0] == 2) notchLocal = notchSegment2e[0];
+            else if(transport_bool[1]){}
+
         }
 
         //MARK:総括制御処理
@@ -182,6 +194,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     transport_bool_from1e = null;
                     transport_bool_fromFront_from1e = null;
                     transport_bool_fromBack_from1e = null;
+                    zengoSwSegment_from1e = null;
                 }
                 else
                 {
@@ -192,6 +205,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     transport_bool_from2e = null;
                     transport_bool_fromFront_from2e = null;
                     transport_bool_fromBack_from2e = null;
+                    zengoSwSegment_from2e = null;
                 }
             }
             ChangeZengoSwEvent();
@@ -205,58 +219,103 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         {
             //前位置もしくは後位置があるなら信号方向は決定してよい
             //前後切替SW：前　確認
-            transport_bool_fromFront[0] = (zengoSwSegment1e[0] == 0) || (zengoSwSegment2e[0] == 0);
-            if(zengoSwSegment1e[0] == 0) transport_bool[0] = false;
-            else if(zengoSwSegment2e[0] == 0) transport_bool[0] = true;
+            transport_bool_fromFront[0] = (zengoSwSegment1e[0] == 2) || (zengoSwSegment2e[0] == 2);
+            if(zengoSwSegment1e[0] == 2) transport_bool[0] = false;
+            else if(zengoSwSegment2e[0] == 2) transport_bool[0] = true;
 
             //前後切替SW：後　確認
-            transport_bool_fromBack[0] = (zengoSwSegment1e[0] == 2) || (zengoSwSegment2e[0] == 2);
-            if(zengoSwSegment1e[0] == 2) transport_bool[0] = true;
-            else if(zengoSwSegment2e[0] == 2) transport_bool[0] = false;
+            transport_bool_fromBack[0] = (zengoSwSegment1e[0] == 0) || (zengoSwSegment2e[0] == 0);
+            if(zengoSwSegment1e[0] == 0) transport_bool[0] = true;
+            else if(zengoSwSegment2e[0] == 0) transport_bool[0] = false;
             
-            transport_bool[1] = (zengoSwSegment1e[0] == 0) || (zengoSwSegment2e[0] == 0) || (zengoSwSegment1e[0] == 2) || (zengoSwSegment2e[0] == 2);
-            
-            //中間車信号方向決定処理
-            if((!isConnectedOtherCar[0] && (zengoSwSegment1e[0] == 1)) || (!isConnectedOtherCar[1] && (zengoSwSegment2e[1] == 1))) transport_bool[1] = false;
-            else if((isConnectedOtherCar[0] && (zengoSwSegment1e[0] == 1)) && (isConnectedOtherCar[1] && (zengoSwSegment2e[1] == 1)))
+            //中間車信号方向決定処理　前後切替SW前後とも中位置
+            if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1))
             {
-                //1エンド側確認
-                //1エンド側の接続先が相手側1エンド側
-                if(end1Train.connectedTrain_F.connectedTrain_F == end1Train)
+                if(isConnectedOtherCar[0])
                 {
-                    isConnectedTo2eCoupler[0] = false;
-                    transport_bool[1] = transport_bool_from1e[0] && transport_bool_from1e[1];//相手側信号方向が2e->1eで方向決定しているなら
+                    if((zengoSwSegment_from1e[0] == 1) && transport_bool_from1e[1])
+                    {
+                        if((isConnectedTo2eCoupler[0] && !transport_bool_from1e[0]))
+                        {
+                            transport_bool[0] = false;
+                            transport_bool[1] = true;
+                        }
+                        else if((!isConnectedTo2eCoupler[0] && transport_bool_from1e[0]))
+                        {
+                            transport_bool[0] = true;
+                            transport_bool[1] = true;
+                        }
+                        else transport_bool[1] = false;
+                    }
+                    else transport_bool[1] = false;
                 }
-                else if(end1Train.connectedTrain_F.connectedTrain_B == end1Train)//1エンド側の接続先が相手側2エンド側 
+                else if(isConnectedOtherCar[1])
                 {
-                    isConnectedTo2eCoupler[0] = true;
-                    transport_bool[1] = !transport_bool_from1e[0] && transport_bool_from1e[1];//相手側信号方向が1e->2eで方向決定しているなら
+                    if((zengoSwSegment_from2e[0] == 1) && transport_bool_from1e[1])
+                    {
+                        if((isConnectedTo2eCoupler[1] && !transport_bool_from2e[0]))
+                        {
+                            transport_bool[0] = false;
+                            transport_bool[1] = true;
+                        }
+                        else if(!isConnectedTo2eCoupler[1] && transport_bool_from2e[0])
+                        {
+                            transport_bool[0] = false;
+                            transport_bool[1] = true;
+                        }
+                        else transport_bool[1] = false;
+                    }
+                    else transport_bool[1] = false;
                 }
-                if(transport_bool[1]) transport_bool[0] = false; //信号方向1e->2e
-
-                //2エンド側で確認
-                if(end2Train.connectedTrain_B.connectedTrain_F == end1Train)//2エンド側の接続先が相手側1エンド側
-                {
-                    isConnectedTo2eCoupler[1] = false;
-                    transport_bool[1] = transport_bool_from2e[0] && transport_bool_from2e[1];//相手側信号方向が2e->1eで方向決定しているなら
-                }
-                else if(end1Train.connectedTrain_B.connectedTrain_B == end1Train)//2エンド側の接続先が相手側2エンド側 
-                {
-                    isConnectedTo2eCoupler[1] = true;
-                    transport_bool[1] = !transport_bool_from2e[0] && transport_bool_from2e[1];//相手側信号方向が1e->2eで方向決定しているなら
-                }
-                if(transport_bool[1]) transport_bool[0] = true; //信号方向2e->1e
-                //ここよくない
+                else transport_bool[1] = false;
             }
+            else transport_bool[1] = true;
+
+            //送受信モード決定 dataDirectionMode
+            if((zengoSwSegment1e[0] == 2) && (zengoSwSegment1e[1] == 0)) dataDirectionMode = 0;
+            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[1] == 2)) dataDirectionMode = 1;
+            else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[1] == 1)) dataDirectionMode = 2;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 2)) dataDirectionMode = 3;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 0)) dataDirectionMode = 4;
+            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[1] == 1)) dataDirectionMode = 5;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 1) && !transport_bool[0] && transport_bool[1]) dataDirectionMode = 6;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 1) && transport_bool[0] && transport_bool[1]) dataDirectionMode = 7;
+            else if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 1) && !transport_bool[1]) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[1] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[1] == 0))) dataDirectionMode = 8;
         }
         public void SendDirectionUpdate()
         {
+            if(isConnectedOtherCar[0])
+            {
+                if(end1Train.connectedTrain_F.connectedTrain_F == end1Train)
+                {
+                    zengoSwSegment_from1e = connectedModule_1e.zengoSwSegment1e;
+                    isConnectedTo2eCoupler[0] = false;
+                }
+                else if(end1Train.connectedTrain_F.connectedTrain_B == end1Train)
+                {
+                    zengoSwSegment_from1e = connectedModule_1e.zengoSwSegment2e;
+                    isConnectedTo2eCoupler[0] = true;
+                }
+            }
+            if(isConnectedOtherCar[1])
+            {
+                if(end2Train.connectedTrain_B.connectedTrain_F == end2Train)
+                {
+                    zengoSwSegment_from2e = connectedModule_1e.zengoSwSegment1e;
+                    isConnectedTo2eCoupler[1] = false;
+                }
+                else if(end2Train.connectedTrain_B.connectedTrain_B == end2Train)
+                {
+                    zengoSwSegment_from2e = connectedModule_1e.zengoSwSegment2e;
+                    isConnectedTo2eCoupler[1] = true;
+                }
+            }
+
             SendDirectionUpdateProcess();
 
+            //運転台側→後端側へ順方向のみ更新
             if(isConnectedOtherCar[0]) connectedModule_1e.SendDirectionUpdateProcess();
             if(isConnectedOtherCar[1]) connectedModule_2e.SendDirectionUpdateProcess();
-
-            Debug.Log("ChangeZengoSw:1e" + zengoSwSegment1e[0] + " 2e:" + zengoSwSegment2e[0]);
         }
     }
 }
