@@ -52,15 +52,13 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [System.NonSerialized] public int[] transport_int = new int[5];
         //予約分
         // 0　notchPos　ATSなどの処理済みの値　セグメント
-        // 1　brakePos　ブレーキハンドルセグメント
+        // 1　brakeSeg　ブレーキハンドルセグメント
 
         [System.NonSerialized] public float[] transport_float = new float[8];
         //予約分
         // 0　forceDirection　1エンド方向を1f、中立で0f、2エンド方向で-1f　方向性
-        // 1　notchPosition　ノッチハンドルポジション
-        // 2　notchNormPosition　ノッチハンドル正規化ポジション
-        // 3　brakePosition　ブレーキハンドルポジション
-        // 4　brakeNormPosition　ブレーキハンドル正規化ポジション
+        // 1　brakePosition　ブレーキハンドルポジション
+        // 2　brakeNormPosition　ブレーキハンドル正規化ポジション
 
         [System.NonSerialized] public bool[] transport_bool = new bool[8];
         //予約分
@@ -114,8 +112,13 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected float brakePositionLocal; //ブレーキハンドルから読み取り
         [SerializeField] protected float brakeNormPosLocal; //ブレーキハンドルから読み取り
         [SerializeField] protected int notchPos; //力行処理に使用する、処理済のノッチ数
-        [SerializeField] protected int brakePos; //制動処理に使用する、処理済のブレーキハンドルセグメント
+        [SerializeField] protected int brakeSeg; //制動処理に使用する、処理済のブレーキハンドルセグメント
+        [SerializeField] protected float brakePos; //制動処理に使用する、処理済のブレーキハンドルポジション
+        [SerializeField] protected float brakeNormPos; //制動処理に使用する、処理済のブレーキハンドル正規化ポジション
         [SerializeField] protected byte dataDirectionMode = 0; //送受信モード 
+
+        protected bool canReadFrom1e;//1エンド側から読み出し可
+        protected bool canReadFrom2e;//2エンド側から読み出し可
 
         [SerializeField] protected TextMeshPro debugText; //デバッグ表示用TextMeshPro
         
@@ -152,9 +155,48 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             //自車送受信モード確認
             
             //ハンドル位置読み取り
-            ReadHandles();
+            if(dataDirectionMode == 0 || dataDirectionMode == 2)
+            {
+                notchSegmentLocal = notchSegment1e[0];
+                brakeSegmentLocal = brakeSegment1e[0];
+                brakePositionLocal = brakePosition1e[0];
+                brakeNormPosLocal = brakeNormPosition1e[0];
+                DecideNotchAndBrakePos();
+            }
+            else if(dataDirectionMode == 1 || dataDirectionMode == 3)
+            {
+                notchSegmentLocal = notchSegment2e[0];
+                brakeSegmentLocal = brakeSegment2e[0];
+                brakePositionLocal = brakePosition2e[0];
+                brakeNormPosLocal = brakeNormPosition2e[0];
+                DecideNotchAndBrakePos();
+            }
+            else
+            {
+                switch(dataDirectionMode)
+                {
+                    case 4://[中][後]
+                        if(canReadFrom1e)
+                        {
+                            notchPos = transport_int_from1e[0];
+                            brakeSeg = transport_int_from1e[1];
+                            brakePos = transport_float_from1e[1];
+                            brakeNormPos = transport_float_from1e[2];
+                        }
+                        break;
+                    case 5:
+                        break;
+                    case 6:
+                        break;
+                    case 7:
+                        break;
+                    default:
+                        break;
+                }
+            }
 
-            //受信処理
+            //力行・制動処理
+            PowerAndBrakeProcess();
 
             //送信処理
 
@@ -163,37 +205,31 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             {
                 string dis_text = "";
                 dis_text += "DateDirectionMode: " + dataDirectionMode + "\n";
+                dis_text += "DateDirection: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "未定義") + "\n";
                 dis_text += "notchSegmentLocal: " + notchSegmentLocal + "\n";
                 dis_text += "brakeSegmentLocal: " + brakeSegmentLocal + "\n";
                 dis_text += "brakePositionLocal: " + brakePositionLocal + "\n";
                 dis_text += "brakeNormPosLocal: " + brakeNormPosLocal + "\n";
-                dis_text += "信号方向: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "未定義") + "\n";
+                dis_text += "notchPos: " + notchPos + "\n";
+                dis_text += "brakeSeg: " + brakeSeg + "\n";
+                dis_text += "brakePos: " + brakePos + "\n";
+                dis_text += "brakeNormPos: " + brakeNormPos + "\n";
                 // dis_text += String.Format("oil:{0:000.00}", convertorOilTemperature) + "\n";
                 // dis_text += String.Format("EC_Mcal:{0:000.00}", engineChargeKcal / 1000f) + "\n";
                 debugText.text = dis_text;
             }
         }
 
-        protected virtual void ReadHandles()
+        protected virtual void DecideNotchAndBrakePos()
         {
-            if(zengoSwSegment1e[0] == 2)
-            {
-                notchSegmentLocal = notchSegment1e[0];
-                // notchPositionLocal = notchPosition1e[0];
-                // notchNormPosLocal = notchNormPosition1e[0];
-                brakeSegmentLocal = brakeSegment1e[0];
-                brakePositionLocal = brakePosition1e[0];
-                brakeNormPosLocal = brakeNormPosition1e[0];
-            }
-            else if(zengoSwSegment2e[0] == 2)
-            {
-                notchSegmentLocal = notchSegment2e[0];
-                // notchPositionLocal = notchPosition2e[0];
-                // notchNormPosLocal = notchNormPosition2e[0];
-                brakeSegmentLocal = brakeSegment2e[0];
-                brakePositionLocal = brakePosition2e[0];
-                brakeNormPosLocal = brakeNormPosition2e[0];
-            }
+            notchPos = notchSegmentLocal;
+            brakeSeg = brakeSegmentLocal;
+            brakePos = brakePositionLocal;
+            brakeNormPos = brakeNormPosLocal;
+        }
+        protected virtual void PowerAndBrakeProcess()
+        {
+
         }
 
         //MARK:総括制御処理
@@ -337,6 +373,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[0] && transport_bool[1]) dataDirectionMode = 6;
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && transport_bool[0] && transport_bool[1]) dataDirectionMode = 7;
             else if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[1]) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) dataDirectionMode = 8;
+            //読み出し可能フラグ更新 canReadFrom1e canReadFrom2e
+            canReadFrom1e = (zengoSwSegment1e[0] == 1) && (zengoSwSegment_from1e[0] == 1);
+            canReadFrom2e = (zengoSwSegment2e[0] == 1) && (zengoSwSegment_from2e[0] == 1);
         }
         public void SendDirectionUpdate()
         {
