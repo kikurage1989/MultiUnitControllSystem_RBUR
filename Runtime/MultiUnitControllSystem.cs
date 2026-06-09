@@ -206,6 +206,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 string dis_text = "";
                 dis_text += "DateDirectionMode: " + dataDirectionMode + "\n";
                 dis_text += "DateDirection: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "未定義") + "\n";
+                dis_text += "canReadFrom1e: " + canReadFrom1e + "\n";
+                dis_text += "canReadFrom2e: " + canReadFrom2e + "\n";
                 dis_text += "notchSegmentLocal: " + notchSegmentLocal + "\n";
                 dis_text += "brakeSegmentLocal: " + brakeSegmentLocal + "\n";
                 dis_text += "brakePositionLocal: " + brakePositionLocal + "\n";
@@ -373,9 +375,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[0] && transport_bool[1]) dataDirectionMode = 6;
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && transport_bool[0] && transport_bool[1]) dataDirectionMode = 7;
             else if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[1]) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) dataDirectionMode = 8;
+            
             //読み出し可能フラグ更新 canReadFrom1e canReadFrom2e
-            canReadFrom1e = (zengoSwSegment1e[0] == 1) && (zengoSwSegment_from1e[0] == 1);
-            canReadFrom2e = (zengoSwSegment2e[0] == 1) && (zengoSwSegment_from2e[0] == 1);
+            if(isConnectedOtherCar[0]) canReadFrom1e = (zengoSwSegment1e[0] == 1) && (zengoSwSegment_from1e[0] == 1);
+            else canReadFrom1e = false;
+            if(isConnectedOtherCar[1]) canReadFrom2e = (zengoSwSegment2e[0] == 1) && (zengoSwSegment_from2e[0] == 1);
+            else canReadFrom2e = false;
         }
         public void SendDirectionUpdate()
         {
