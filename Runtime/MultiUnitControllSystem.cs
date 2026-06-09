@@ -6,10 +6,13 @@ using VRC.SDKBase;
 using VRC.Udon;
 using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
+using TMPro; //TextMeshProを扱う際に必要
+using System;//Stringに使用
 
 //編成の要件
 //Train_PrefabのFCouplerObjがついている方を1エンド側と定義する
 //編成の前後でFCouplerObj、BCouplerObjが揃うこと
+//1ハンドル車を作成したい場合は、brakeLever1e、brakeLever2e　をNoneにすること
 
 namespace ragecraft.MultiUnitControllSystem_RBUR
 {
@@ -35,7 +38,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected float[] brakePosition1e = new float[1];
         protected float[] brakeNormPosition1e = new float[1];
         protected int[] reverserSegment1e = new int[1];
-        public int[] zengoSwSegment1e = new int[1];
+        [System.NonSerialized] public int[] zengoSwSegment1e = new int[1];
 
         protected int[] notchSegment2e = new int[1];
         protected float[] notchPosition2e = new float[1];
@@ -44,7 +47,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected float[] brakePosition2e = new float[1];
         protected float[] brakeNormPosition2e = new float[1];
         protected int[] reverserSegment2e = new int[1];
-        public int[] zengoSwSegment2e = new int[1];
+        [System.NonSerialized] public int[] zengoSwSegment2e = new int[1];
 
         [System.NonSerialized] public int[] transport_int = new int[5];
         //予約分
@@ -104,16 +107,25 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool[] isConnectedOtherCar = new bool[2]; //通信接続がされているかのフラグ 0:1エンド側 1:2エンド側
         protected bool[] isConnectedTo2eCoupler = new bool[2]; //接続した相手車両の接続カプラが2エンド側か　Falseで1エンド側 0:自車1エンド側 1:自車2エンド側 isConnectedOtherCarと組み合わせること
 
-        [SerializeField] protected int notchLocal; //ノッチハンドルから読み取り
-        [SerializeField] protected int notchPos; //力行出力計算に使用する、処理済のノッチ数
+        [SerializeField] protected int notchSegmentLocal; //ノッチハンドルから読み取り
+        // [SerializeField] protected float notchPositionLocal; //ノッチハンドルから読み取り
+        // [SerializeField] protected float notchNormPosLocal; //ノッチハンドルから読み取り
+        [SerializeField] protected int brakeSegmentLocal; //ブレーキハンドルから読み取り
+        [SerializeField] protected float brakePositionLocal; //ブレーキハンドルから読み取り
+        [SerializeField] protected float brakeNormPosLocal; //ブレーキハンドルから読み取り
+        [SerializeField] protected int notchPos; //力行処理に使用する、処理済のノッチ数
+        [SerializeField] protected int brakePos; //制動処理に使用する、処理済のブレーキハンドルセグメント
         [SerializeField] protected byte dataDirectionMode = 0; //送受信モード 
 
+        [SerializeField] protected TextMeshPro debugText; //デバッグ表示用TextMeshPro
+        
+        protected bool has2Handle = true;
         protected bool isInit = false;
         protected virtual void Start()
         {
             notchSegment1e = notchLever1e.currentSegment_Exposed;
-            notchPosition1e = notchLever1e.controllerPosition_Exposed;
-            notchNormPosition1e = notchLever1e.currentNormalizePosition_Exposed;
+            // notchPosition1e = notchLever1e.controllerPosition_Exposed;
+            // notchNormPosition1e = notchLever1e.currentNormalizePosition_Exposed;
             brakeSegment1e = brakeLever1e.currentSegment_Exposed;
             brakePosition1e = brakeLever1e.controllerPosition_Exposed;
             brakeNormPosition1e = brakeLever1e.currentNormalizePosition_Exposed;
@@ -121,13 +133,15 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             zengoSwSegment1e = zengoSW1e.currentSegment_Exposed;
 
             notchSegment2e = notchLever2e.currentSegment_Exposed;
-            notchPosition2e = notchLever2e.controllerPosition_Exposed;
-            notchNormPosition2e = notchLever2e.currentNormalizePosition_Exposed;
+            // notchPosition2e = notchLever2e.controllerPosition_Exposed;
+            // notchNormPosition2e = notchLever2e.currentNormalizePosition_Exposed;
             brakeSegment2e = brakeLever2e.currentSegment_Exposed;
             brakePosition2e = brakeLever2e.controllerPosition_Exposed;
             brakeNormPosition2e = brakeLever2e.currentNormalizePosition_Exposed;
             reverserSegment2e = reverser2e.currentSegment_Exposed;
             zengoSwSegment2e = zengoSW2e.currentSegment_Exposed;
+
+            has2Handle = Utilities.IsValid(brakeLever1e) && Utilities.IsValid(brakeLever2e);
 
             isInit = true;
         }
@@ -137,11 +151,49 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             if(!isInit) return;
             //自車送受信モード確認
             
-            //ノッチハンドル位置読み取り
-            if(zengoSwSegment1e[0] == 2) notchLocal = notchSegment1e[0];
-            else if(zengoSwSegment2e[0] == 2) notchLocal = notchSegment2e[0];
-            else if(transport_bool[1]){}
+            //ハンドル位置読み取り
+            ReadHandles();
 
+            //受信処理
+
+            //送信処理
+
+            //Debug表示
+            if(Utilities.IsValid(debugText))
+            {
+                string dis_text = "";
+                dis_text += "DateDirectionMode: " + dataDirectionMode + "\n";
+                dis_text += "notchSegmentLocal: " + notchSegmentLocal + "\n";
+                dis_text += "brakeSegmentLocal: " + brakeSegmentLocal + "\n";
+                dis_text += "brakePositionLocal: " + brakePositionLocal + "\n";
+                dis_text += "brakeNormPosLocal: " + brakeNormPosLocal + "\n";
+                dis_text += "信号方向: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "未定義") + "\n";
+                // dis_text += String.Format("oil:{0:000.00}", convertorOilTemperature) + "\n";
+                // dis_text += String.Format("EC_Mcal:{0:000.00}", engineChargeKcal / 1000f) + "\n";
+                debugText.text = dis_text;
+            }
+        }
+
+        protected virtual void ReadHandles()
+        {
+            if(zengoSwSegment1e[0] == 2)
+            {
+                notchSegmentLocal = notchSegment1e[0];
+                // notchPositionLocal = notchPosition1e[0];
+                // notchNormPosLocal = notchNormPosition1e[0];
+                brakeSegmentLocal = brakeSegment1e[0];
+                brakePositionLocal = brakePosition1e[0];
+                brakeNormPosLocal = brakeNormPosition1e[0];
+            }
+            else if(zengoSwSegment2e[0] == 2)
+            {
+                notchSegmentLocal = notchSegment2e[0];
+                // notchPositionLocal = notchPosition2e[0];
+                // notchNormPosLocal = notchNormPosition2e[0];
+                brakeSegmentLocal = brakeSegment2e[0];
+                brakePositionLocal = brakePosition2e[0];
+                brakeNormPosLocal = brakeNormPosition2e[0];
+            }
         }
 
         //MARK:総括制御処理
@@ -215,8 +267,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         {
             SendCustomEventDelayedFrames(nameof(SendDirectionUpdate), 1);
         }
+
+        protected byte retryCount = 0;
         public void SendDirectionUpdateProcess()
         {
+            if(!isInit) return;
             //前位置もしくは後位置があるなら信号方向は決定してよい
             //前後切替SW：前　確認
             transport_bool_fromFront[0] = (zengoSwSegment1e[0] == 2) || (zengoSwSegment2e[0] == 2);
@@ -269,18 +324,19 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 }
                 else transport_bool[1] = false;
             }
+            else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = false;
             else transport_bool[1] = true;
 
             //送受信モード決定 dataDirectionMode
-            if((zengoSwSegment1e[0] == 2) && (zengoSwSegment1e[1] == 0)) dataDirectionMode = 0;
-            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[1] == 2)) dataDirectionMode = 1;
-            else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[1] == 1)) dataDirectionMode = 2;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 2)) dataDirectionMode = 3;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 0)) dataDirectionMode = 4;
-            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[1] == 1)) dataDirectionMode = 5;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 1) && !transport_bool[0] && transport_bool[1]) dataDirectionMode = 6;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 1) && transport_bool[0] && transport_bool[1]) dataDirectionMode = 7;
-            else if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[1] == 1) && !transport_bool[1]) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[1] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[1] == 0))) dataDirectionMode = 8;
+            if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 0;
+            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 1;
+            else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 2;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 3;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 4;
+            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 5;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[0] && transport_bool[1]) dataDirectionMode = 6;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && transport_bool[0] && transport_bool[1]) dataDirectionMode = 7;
+            else if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[1]) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) dataDirectionMode = 8;
         }
         public void SendDirectionUpdate()
         {
