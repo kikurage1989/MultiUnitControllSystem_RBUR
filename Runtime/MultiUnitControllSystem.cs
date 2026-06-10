@@ -152,7 +152,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected virtual void Update()
         {
             if(!isInit) return;
-            //自車送受信モード確認
             
             //ハンドル位置読み取り
             if(dataDirectionMode == 0 || dataDirectionMode == 2)
@@ -184,7 +183,14 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                             brakeNormPos = transport_float_from1e[2];
                         }
                         break;
-                    case 5:
+                    case 5://[後][中]
+                        if(canReadFrom2e)
+                        {
+                            notchPos = transport_int_from2e[0];
+                            brakeSeg = transport_int_from2e[1];
+                            brakePos = transport_float_from2e[1];
+                            brakeNormPos = transport_float_from2e[2];
+                        }
                         break;
                     case 6:
                         break;
@@ -199,6 +205,15 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             PowerAndBrakeProcess();
 
             //送信処理
+            if(dataDirectionMode <= 3)
+            {
+                transport_int[0] = notchPos;
+                transport_int[1] = brakeSeg;
+
+                // transport_float[0] = forceDirection;
+                transport_float[1] = brakePos;
+                transport_float[2] = brakeNormPos;
+            }
 
             //Debug表示
             if(Utilities.IsValid(debugText))
@@ -236,8 +251,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
         //MARK:総括制御処理
         //Train.csから増解結時に呼び出される connectedTrain:接続先Train bool F_B前カプラ側かどうか
-        protected MultiUnitControllSystem connectedModule_1e = null;
-        protected MultiUnitControllSystem connectedModule_2e = null;
+        [SerializeField] protected MultiUnitControllSystem connectedModule_1e = null;
+        [SerializeField] protected MultiUnitControllSystem connectedModule_2e = null;
         public override void TrainConnectionUpdate(frou01.RigidBodyTrain.Train connectedTrain, bool F_B)
         {
             if (connectedTrain != null)
@@ -344,7 +359,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 }
                 else if(isConnectedOtherCar[1])
                 {
-                    if((zengoSwSegment_from2e[0] == 1) && transport_bool_from1e[1])
+                    if((zengoSwSegment_from2e[0] == 1) && transport_bool_from2e[1])
                     {
                         if((isConnectedTo2eCoupler[1] && !transport_bool_from2e[0]))
                         {
@@ -401,12 +416,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             {
                 if(end2Train.connectedTrain_B.connectedTrain_F == end2Train)
                 {
-                    zengoSwSegment_from2e = connectedModule_1e.zengoSwSegment1e;
+                    zengoSwSegment_from2e = connectedModule_2e.zengoSwSegment1e;
                     isConnectedTo2eCoupler[1] = false;
                 }
                 else if(end2Train.connectedTrain_B.connectedTrain_B == end2Train)
                 {
-                    zengoSwSegment_from2e = connectedModule_1e.zengoSwSegment2e;
+                    zengoSwSegment_from2e = connectedModule_2e.zengoSwSegment2e;
                     isConnectedTo2eCoupler[1] = true;
                 }
             }
