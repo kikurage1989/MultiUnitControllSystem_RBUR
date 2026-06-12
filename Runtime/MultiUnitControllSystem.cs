@@ -56,7 +56,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
         [System.NonSerialized] public float[] transport_float = new float[8];
         //予約分
-        // 0　forceDirection　1エンド方向を1f、中立で0f、2エンド方向で-1f　方向性
+        // 0　powerDirection　1エンド方向を1f、中立で0f、2エンド方向で-1f　方向性
         // 1　brakePosition　ブレーキハンドルポジション
         // 2　brakeNormPosition　ブレーキハンドル正規化ポジション
 
@@ -115,7 +115,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected int brakeSeg; //制動処理に使用する、処理済のブレーキハンドルセグメント
         [SerializeField] protected float brakePos; //制動処理に使用する、処理済のブレーキハンドルポジション
         [SerializeField] protected float brakeNormPos; //制動処理に使用する、処理済のブレーキハンドル正規化ポジション
-        [SerializeField] protected byte dataDirectionMode = 0; //送受信モード 
+        [SerializeField] protected byte dataDirectionMode = 0; //送受信モード
+        [SerializeField] protected float powerDirection = 0f;//1: 1エンド側　-1：2エンド側
 
         protected bool canReadFrom1e;//1エンド側から読み出し可
         protected bool canReadFrom2e;//2エンド側から読み出し可
@@ -148,71 +149,69 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             isInit = true;
         }
-
+        
         protected virtual void Update()
         {
             if(!isInit) return;
             
             //ハンドル位置読み取り
-            if(dataDirectionMode == 0 || dataDirectionMode == 2)
+            switch(dataDirectionMode)
             {
-                notchSegmentLocal = notchSegment1e[0];
-                brakeSegmentLocal = brakeSegment1e[0];
-                brakePositionLocal = brakePosition1e[0];
-                brakeNormPosLocal = brakeNormPosition1e[0];
-                DecideNotchAndBrakePos();
-            }
-            else if(dataDirectionMode == 1 || dataDirectionMode == 3)
-            {
-                notchSegmentLocal = notchSegment2e[0];
-                brakeSegmentLocal = brakeSegment2e[0];
-                brakePositionLocal = brakePosition2e[0];
-                brakeNormPosLocal = brakeNormPosition2e[0];
-                DecideNotchAndBrakePos();
-            }
-            else
-            {
-                switch(dataDirectionMode)
-                {
-                    case 4://[中][後]
-                        if(canReadFrom1e)
-                        {
-                            notchPos = transport_int_from1e[0];
-                            brakeSeg = transport_int_from1e[1];
-                            brakePos = transport_float_from1e[1];
-                            brakeNormPos = transport_float_from1e[2];
-                        }
-                        break;
-                    case 5://[後][中]
-                        if(canReadFrom2e)
-                        {
-                            notchPos = transport_int_from2e[0];
-                            brakeSeg = transport_int_from2e[1];
-                            brakePos = transport_float_from2e[1];
-                            brakeNormPos = transport_float_from2e[2];
-                        }
-                        break;
-                    case 6:
-                        break;
-                    case 7:
-                        break;
-                    default:
-                        break;
-                }
+                case 0://[前][後]
+                case 1://[前][中]
+                    notchSegmentLocal = notchSegment1e[0];
+                    brakeSegmentLocal = brakeSegment1e[0];
+                    brakePositionLocal = brakePosition1e[0];
+                    brakeNormPosLocal = brakeNormPosition1e[0];
+                    powerDirection = reverserSegment1e[0] - 1f;
+                    DecideNotchAndBrakePos();
+                    break;
+                case 2://[後][前]
+                case 3://[中][前]
+                    notchSegmentLocal = notchSegment2e[0];
+                    brakeSegmentLocal = brakeSegment2e[0];
+                    brakePositionLocal = brakePosition2e[0];
+                    brakeNormPosLocal = brakeNormPosition2e[0];
+                    powerDirection = -1f * (reverserSegment2e[0] - 1f);
+                    DecideNotchAndBrakePos();
+                    break;
+                case 4://[中][後]
+                    ReadControllerParametersFrom1e();
+                    break;
+                case 5://[後][中]
+                    ReadControllerParametersFrom2e();
+                    break;
+                case 6://[中][中]かつ送信方向が1e->2eで決定済
+                    ReadControllerParametersFrom1e();
+                    break;
+                case 7://[中][中]かつ送信方向が2e->1eで決定済
+                    ReadControllerParametersFrom2e();
+                    break;
+                default:
+                    break;
             }
 
             //力行・制動処理
             PowerAndBrakeProcess();
 
             //送信処理
-            if(dataDirectionMode <= 3)
+            //操作系変数送信
+            if(dataDirectionMode <= 3 || dataDirectionMode == 6 || dataDirectionMode == 7)
             {
                 transport_int[0] = notchPos;
                 transport_int[1] = brakeSeg;
-
-                // transport_float[0] = forceDirection;
                 transport_float[1] = brakePos;
                 transport_float[2] = brakeNormPos;
+                //方向性信号
+                if(!transport_bool[0]) //2e側へ送信
+                {
+                    transport_float[0] = -1f * powerDirection;
+                }
+                else //1e側へ送信
+                {
+                    transport_float[0] = powerDirection;
+                }
+                
             }
 
             //Debug表示
@@ -231,6 +230,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 dis_text += "brakeSeg: " + brakeSeg + "\n";
                 dis_text += "brakePos: " + brakePos + "\n";
                 dis_text += "brakeNormPos: " + brakeNormPos + "\n";
+                dis_text += "powerDirection: " + powerDirection + "\n";
                 // dis_text += String.Format("oil:{0:000.00}", convertorOilTemperature) + "\n";
                 // dis_text += String.Format("EC_Mcal:{0:000.00}", engineChargeKcal / 1000f) + "\n";
                 debugText.text = dis_text;
@@ -247,6 +247,30 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected virtual void PowerAndBrakeProcess()
         {
 
+        }
+
+        //操作系変数読み取り処理
+        protected void ReadControllerParametersFrom1e()
+        {
+            if(canReadFrom1e)
+            {
+                notchPos = transport_int_from1e[0];
+                brakeSeg = transport_int_from1e[1];
+                brakePos = transport_float_from1e[1];
+                brakeNormPos = transport_float_from1e[2];
+                powerDirection = -1f * transport_float_from1e[0];
+            }
+        }
+        protected void ReadControllerParametersFrom2e()
+        {
+            if(canReadFrom2e)
+            {
+                notchPos = transport_int_from2e[0];
+                brakeSeg = transport_int_from2e[1];
+                brakePos = transport_float_from2e[1];
+                brakeNormPos = transport_float_from2e[2];
+                powerDirection = transport_float_from2e[0];
+            }
         }
 
         //MARK:総括制御処理
@@ -382,8 +406,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             //送受信モード決定 dataDirectionMode
             if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 0;
-            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 1;
-            else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 2;
+            else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 1;
+            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 2;
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 3;
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 4;
             else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 5;
