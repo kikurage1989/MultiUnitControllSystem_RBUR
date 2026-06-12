@@ -379,8 +379,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             transport_bool_fromBack[0] = (zengoSwSegment1e[0] == 0) || (zengoSwSegment2e[0] == 0);
             if(zengoSwSegment1e[0] == 0) transport_bool[0] = true;
             else if(zengoSwSegment2e[0] == 0) transport_bool[0] = false;
-
-            transport_bool[1] = false;
             
             //中間車信号方向決定処理　前後切替SW前後とも中位置
             if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1))
@@ -400,17 +398,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                             transport_bool[0] = true;
                             transport_bool[1] = true;
                         }
-                        else
-                        {
-                            if(debug_flg) Debug.Log("test1");
-                            transport_bool[1] = false;
-                        }
+                        else transport_bool[1] = false;
                     }
-                    else
-                    {
-                        if(debug_flg) Debug.Log("test2");
-                        transport_bool[1] = false;
-                    }
+                    else transport_bool[1] = false;
                 }
                 if(!transport_bool[1] && isConnectedOtherCar[1])//1エンド側で送信方向が決定しない場合のみ2エンド側を確認
                 {
@@ -430,7 +420,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     }
                     else transport_bool[1] = false;
                 }
-                else transport_bool[1] = false;
             }
             else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = false;
             else transport_bool[1] = true;
