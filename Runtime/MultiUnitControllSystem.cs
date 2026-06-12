@@ -126,9 +126,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool has2Handle = true;
         protected bool isInit = false;
         protected bool isOwnerState;
-        [SerializeField] protected bool debug_flg;
+        protected float updateDeltaTime = 0.01f;//念のため
 
         //開発用仮実装
+        [SerializeField] protected bool debug_flg;
         [SerializeField] protected frou01.RigidBodyTrain.MortorAndWheel _MotorAndWheel;
         protected float[] outputMortorForce = new float[1];
         protected float[] outputBrakeForce = new float[1];
@@ -165,7 +166,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected virtual void Update()
         {
             if(!isInit) return;
-            
+            updateDeltaTime = Time.deltaTime;
+
             //ハンドル位置読み取り
             switch(dataDirectionMode)
             {
@@ -243,6 +245,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 dis_text += "brakePos: " + brakePos + "\n";
                 dis_text += "brakeNormPos: " + brakeNormPos + "\n";
                 dis_text += "powerDirection: " + powerDirection + "\n";
+                dis_text += "FrontCheck: " + transport_bool_fromFront[0] + "\n";
+                dis_text += "BackCheck: " + transport_bool_fromBack[0] + "\n";
                 // dis_text += String.Format("oil:{0:000.00}", convertorOilTemperature) + "\n";
                 // dis_text += String.Format("EC_Mcal:{0:000.00}", engineChargeKcal / 1000f) + "\n";
                 debugText.text = dis_text;
@@ -258,6 +262,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         protected virtual void PowerAndBrakeProcess()
         {
+            //Update内でオーナーのみ実行
+            //Time.deltaTimeの値はupdateDeltaTimeに格納済
             //開発用仮実装
             // outputMortorForce[0] = powerDirection * 10000f * notchPos;
             // outputBrakeForce[0] = (brakeSeg == 0 ? 0f : 70000f * brakeNormPos);
@@ -387,41 +393,40 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 {
                     if((zengoSwSegment_from1e[0] == 1) && transport_bool_from1e[1])
                     {
-                        if((isConnectedTo2eCoupler[0] && !transport_bool_from1e[0]))
+                        if(isConnectedTo2eCoupler[0] && !transport_bool_from1e[0] && transport_bool_fromFront_from1e[0])
                         {
-                            if(debug_flg) Debug.Log("2エンド側と接続 相手車1e->2e");
                             transport_bool[0] = false;
-                            transport_bool[1] = true;
+                            transport_bool[1] = transport_bool_fromFront[0] = true;
                         }
-                        else if((!isConnectedTo2eCoupler[0] && transport_bool_from1e[0]))
+                        else if(!isConnectedTo2eCoupler[0] && transport_bool_from1e[0] && transport_bool_fromFront_from1e[0])
                         {
                             transport_bool[0] = true;
-                            transport_bool[1] = true;
+                            transport_bool[1] = transport_bool_fromFront[0] = true;
                         }
-                        else transport_bool[1] = false;
+                        else transport_bool[1] = transport_bool_fromFront[0] = false;
                     }
-                    else transport_bool[1] = false;
+                    else transport_bool[1] = transport_bool_fromFront[0] = false;
                 }
                 if(!transport_bool[1] && isConnectedOtherCar[1])//1エンド側で送信方向が決定しない場合のみ2エンド側を確認
                 {
                     if((zengoSwSegment_from2e[0] == 1) && transport_bool_from2e[1])
                     {
-                        if((isConnectedTo2eCoupler[1] && !transport_bool_from2e[0]))
+                        if(isConnectedTo2eCoupler[1] && !transport_bool_from2e[0] && transport_bool_fromFront_from2e[0])
                         {
                             transport_bool[0] = false;
-                            transport_bool[1] = true;
+                            transport_bool[1] = transport_bool_fromFront[0] = true;
                         }
-                        else if(!isConnectedTo2eCoupler[1] && transport_bool_from2e[0])
+                        else if(!isConnectedTo2eCoupler[1] && transport_bool_from2e[0] && transport_bool_fromFront_from2e[0])
                         {
                             transport_bool[0] = false;
-                            transport_bool[1] = true;
+                            transport_bool[1] = transport_bool_fromFront[0] =true;
                         }
-                        else transport_bool[1] = false;
+                        else transport_bool[1] = transport_bool_fromFront[0] =false;
                     }
-                    else transport_bool[1] = false;
+                    else transport_bool[1] = transport_bool_fromFront[0] = false;
                 }
             }
-            else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = false;
+            else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = false;
             else transport_bool[1] = true;
 
             //送受信モード決定 dataDirectionMode
@@ -467,7 +472,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             SendDirectionUpdateProcess();
 
-            //運転台側→後端側へ順方向のみ更新
             if(isConnectedOtherCar[0]) connectedModule_1e.SendDirectionUpdateProcess();
             if(isConnectedOtherCar[1]) connectedModule_2e.SendDirectionUpdateProcess();
         }
