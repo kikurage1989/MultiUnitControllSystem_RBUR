@@ -125,8 +125,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         
         protected bool has2Handle = true;
         protected bool isInit = false;
+        protected bool isOwnerState;
+
+        //開発用仮実装
+        [SerializeField] protected frou01.RigidBodyTrain.MortorAndWheel _MotorAndWheel;
+        protected float[] outputMortorForce = new float[1];
+        protected float[] outputBrakeForce = new float[1];
+
         protected virtual void Start()
         {
+            isOwnerState = Networking.IsOwner(this.gameObject);
             notchSegment1e = notchLever1e.currentSegment_Exposed;
             // notchPosition1e = notchLever1e.controllerPosition_Exposed;
             // notchNormPosition1e = notchLever1e.currentNormalizePosition_Exposed;
@@ -148,6 +156,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             has2Handle = Utilities.IsValid(brakeLever1e) && Utilities.IsValid(brakeLever2e);
 
             isInit = true;
+            //開発用仮実装
+            outputMortorForce = _MotorAndWheel.MortorForce;
+            outputBrakeForce = _MotorAndWheel.BrakeForce;
         }
         
         protected virtual void Update()
@@ -192,7 +203,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             }
 
             //力行・制動処理
-            PowerAndBrakeProcess();
+            if(isOwnerState) PowerAndBrakeProcess();
 
             //送信処理
             //操作系変数送信
@@ -246,7 +257,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         protected virtual void PowerAndBrakeProcess()
         {
-
+            //開発用仮実装
+            // outputMortorForce[0] = powerDirection * 10000f * notchPos;
+            // outputBrakeForce[0] = (brakeSeg == 0 ? 0f : 70000f * brakeNormPos);
         }
 
         //操作系変数読み取り処理
@@ -275,8 +288,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
         //MARK:総括制御処理
         //Train.csから増解結時に呼び出される connectedTrain:接続先Train bool F_B前カプラ側かどうか
-        [SerializeField] protected MultiUnitControllSystem connectedModule_1e = null;
-        [SerializeField] protected MultiUnitControllSystem connectedModule_2e = null;
+        protected MultiUnitControllSystem connectedModule_1e = null;
+        protected MultiUnitControllSystem connectedModule_2e = null;
         public override void TrainConnectionUpdate(frou01.RigidBodyTrain.Train connectedTrain, bool F_B)
         {
             if (connectedTrain != null)
@@ -455,6 +468,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             //運転台側→後端側へ順方向のみ更新
             if(isConnectedOtherCar[0]) connectedModule_1e.SendDirectionUpdateProcess();
             if(isConnectedOtherCar[1]) connectedModule_2e.SendDirectionUpdateProcess();
+        }
+
+        public override void OnOwnershipTransferred(VRC.SDKBase.VRCPlayerApi player)
+        {
+            isOwnerState = player == Networking.LocalPlayer;
         }
     }
 }
