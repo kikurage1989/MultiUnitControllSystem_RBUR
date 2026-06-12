@@ -126,6 +126,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool has2Handle = true;
         protected bool isInit = false;
         protected bool isOwnerState;
+        [SerializeField] protected bool debug_flg;
 
         //開発用仮実装
         [SerializeField] protected frou01.RigidBodyTrain.MortorAndWheel _MotorAndWheel;
@@ -362,6 +363,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         public void SendDirectionUpdateProcess()
         {
             if(!isInit) return;
+            //読み出し可能フラグ更新 canReadFrom1e canReadFrom2e
+            if(isConnectedOtherCar[0]) canReadFrom1e = (zengoSwSegment1e[0] == 1) && (zengoSwSegment_from1e[0] == 1);
+            else canReadFrom1e = false;
+            if(isConnectedOtherCar[1]) canReadFrom2e = (zengoSwSegment2e[0] == 1) && (zengoSwSegment_from2e[0] == 1);
+            else canReadFrom2e = false;
+
             //前位置もしくは後位置があるなら信号方向は決定してよい
             //前後切替SW：前　確認
             transport_bool_fromFront[0] = (zengoSwSegment1e[0] == 2) || (zengoSwSegment2e[0] == 2);
@@ -372,6 +379,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             transport_bool_fromBack[0] = (zengoSwSegment1e[0] == 0) || (zengoSwSegment2e[0] == 0);
             if(zengoSwSegment1e[0] == 0) transport_bool[0] = true;
             else if(zengoSwSegment2e[0] == 0) transport_bool[0] = false;
+
+            transport_bool[1] = false;
             
             //中間車信号方向決定処理　前後切替SW前後とも中位置
             if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1))
@@ -382,6 +391,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     {
                         if((isConnectedTo2eCoupler[0] && !transport_bool_from1e[0]))
                         {
+                            if(debug_flg) Debug.Log("2エンド側と接続 相手車1e->2e");
                             transport_bool[0] = false;
                             transport_bool[1] = true;
                         }
@@ -390,11 +400,19 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                             transport_bool[0] = true;
                             transport_bool[1] = true;
                         }
-                        else transport_bool[1] = false;
+                        else
+                        {
+                            if(debug_flg) Debug.Log("test1");
+                            transport_bool[1] = false;
+                        }
                     }
-                    else transport_bool[1] = false;
+                    else
+                    {
+                        if(debug_flg) Debug.Log("test2");
+                        transport_bool[1] = false;
+                    }
                 }
-                else if(isConnectedOtherCar[1])
+                if(!transport_bool[1] && isConnectedOtherCar[1])//1エンド側で送信方向が決定しない場合のみ2エンド側を確認
                 {
                     if((zengoSwSegment_from2e[0] == 1) && transport_bool_from2e[1])
                     {
@@ -428,11 +446,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && transport_bool[0] && transport_bool[1]) dataDirectionMode = 7;
             else if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[1]) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) dataDirectionMode = 8;
             
-            //読み出し可能フラグ更新 canReadFrom1e canReadFrom2e
-            if(isConnectedOtherCar[0]) canReadFrom1e = (zengoSwSegment1e[0] == 1) && (zengoSwSegment_from1e[0] == 1);
-            else canReadFrom1e = false;
-            if(isConnectedOtherCar[1]) canReadFrom2e = (zengoSwSegment2e[0] == 1) && (zengoSwSegment_from2e[0] == 1);
-            else canReadFrom2e = false;
         }
         public void SendDirectionUpdate()
         {
