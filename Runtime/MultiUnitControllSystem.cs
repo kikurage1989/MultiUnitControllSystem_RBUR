@@ -389,43 +389,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1))
             {
                 transport_bool_fromFront[0] = false;
-
-                if(isConnectedOtherCar[0])
-                {
-                    if((zengoSwSegment_from1e[0] == 1) && transport_bool_from1e[1])
-                    {
-                        if(isConnectedTo2eCoupler[0] && !transport_bool_from1e[0] && transport_bool_fromFront_from1e[0])
-                        {
-                            transport_bool[0] = false;
-                            transport_bool[1] = transport_bool_fromFront[0] = true;
-                        }
-                        else if(!isConnectedTo2eCoupler[0] && transport_bool_from1e[0] && transport_bool_fromFront_from1e[0])
-                        {
-                            transport_bool[0] = true;
-                            transport_bool[1] = transport_bool_fromFront[0] = true;
-                        }
-                        else transport_bool[1] = transport_bool_fromFront[0] = false;
-                    }
-                    else transport_bool[1] = transport_bool_fromFront[0] = false;
-                }
-                if(!transport_bool[1] && isConnectedOtherCar[1])//1エンド側で送信方向が決定しない場合のみ2エンド側を確認
-                {
-                    if((zengoSwSegment_from2e[0] == 1) && transport_bool_from2e[1])
-                    {
-                        if(isConnectedTo2eCoupler[1] && !transport_bool_from2e[0] && transport_bool_fromFront_from2e[0])
-                        {
-                            transport_bool[0] = true;
-                            transport_bool[1] = transport_bool_fromFront[0] = true;
-                        }
-                        else if(!isConnectedTo2eCoupler[1] && transport_bool_from2e[0] && transport_bool_fromFront_from2e[0])
-                        {
-                            transport_bool[0] = false;
-                            transport_bool[1] = transport_bool_fromFront[0] =true;
-                        }
-                        else transport_bool[1] = transport_bool_fromFront[0] =false;
-                    }
-                    else transport_bool[1] = transport_bool_fromFront[0] = false;
-                }
             }
             else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = false;
             else transport_bool[1] = true;
