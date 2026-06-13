@@ -198,17 +198,37 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 case 6://[中][中]　中間車送信方向決定処理
                     if(canReadFrom1e && canReadFrom2e)
                     {
-                        if(transport_bool_from1e[0] && transport_bool_from1e[1])//1エンド側から確認
+                        if(transport_bool_from1e[1] && transport_bool_fromFront_from1e[0])//1エンド側から確認
                         {
+                            transport_bool[0] = false;
+                            transport_bool[1] = true;
+                            dataDirectionMode = 7;
+                        }
+                        else if(transport_bool_from2e[1] && transport_bool_fromFront_from2e[0])//2エンド側確認
+                        {
+                            transport_bool[0] = true;
+                            transport_bool[1] = true;
+                            dataDirectionMode = 8;
                         }
                     }
-                    else return;
                     break;
                 case 7://[中][中]かつ送信方向が1e->2eで決定済
                     ReadControllerParametersFrom1e();
+                    if(!transport_bool_fromFront_from1e[0])
+                    {
+                        transport_bool_fromFront[0] = false;
+                        dataDirectionMode = 6;
+                        transport_bool[1] = false;
+                    }
                     break;
                 case 8://[中][中]かつ送信方向が2e->1eで決定済
                     ReadControllerParametersFrom2e();
+                    if(!transport_bool_fromFront_from2e[0])
+                    {
+                        transport_bool_fromFront[0] = false;
+                        dataDirectionMode = 6;
+                        transport_bool[1] = false;
+                    }
                     break;
                 default:
                     break;
@@ -281,8 +301,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         //操作系変数読み取り処理
         protected void ReadControllerParametersFrom1e()
         {
-            if(canReadFrom1e)
+            if(canReadFrom1e && transport_bool_fromFront_from1e[0])
             {
+                transport_bool_fromFront[0] = true;
                 notchPos = transport_int_from1e[0];
                 brakeSeg = transport_int_from1e[1];
                 brakePos = transport_float_from1e[1];
@@ -292,8 +313,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         protected void ReadControllerParametersFrom2e()
         {
-            if(canReadFrom2e)
+            if(canReadFrom2e && transport_bool_fromFront_from2e[0])
             {
+                transport_bool_fromFront[0] = true;
                 notchPos = transport_int_from2e[0];
                 brakeSeg = transport_int_from2e[1];
                 brakePos = transport_float_from2e[1];
@@ -397,7 +419,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             //中間車信号方向決定処理　前後切替SW前後とも中位置
             if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = transport_bool_fromBack[0] = false;
             else transport_bool[1] = true;
-            
+
+            if(debug_flg) Debug.Log("チェック前：zengoSwSegment1e[0]:" + zengoSwSegment1e[0] + " zengoSwSegment2e[0]:" + zengoSwSegment2e[0]);
+
             //送受信モード決定 dataDirectionMode
             if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 0;
             else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 1;
@@ -438,6 +462,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 }
             }
             SendDirectionUpdateProcess();
+
+            if(isConnectedOtherCar[0]) connectedModule_1e.SendDirectionUpdateProcess();
+            if(isConnectedOtherCar[1]) connectedModule_2e.SendDirectionUpdateProcess();
         }
 
         public override void OnOwnershipTransferred(VRC.SDKBase.VRCPlayerApi player)
