@@ -389,6 +389,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             //中間車信号方向決定処理　前後切替SW前後とも中位置
             if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1))
             {
+                transport_bool_fromFront[0] = false;
+
                 if(isConnectedOtherCar[0])
                 {
                     if((zengoSwSegment_from1e[0] == 1) && transport_bool_from1e[1])
@@ -413,7 +415,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     {
                         if(isConnectedTo2eCoupler[1] && !transport_bool_from2e[0] && transport_bool_fromFront_from2e[0])
                         {
-                            transport_bool[0] = false;
+                            transport_bool[0] = true;
                             transport_bool[1] = transport_bool_fromFront[0] = true;
                         }
                         else if(!isConnectedTo2eCoupler[1] && transport_bool_from2e[0] && transport_bool_fromFront_from2e[0])
