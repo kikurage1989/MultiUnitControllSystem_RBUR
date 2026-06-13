@@ -365,7 +365,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             SendCustomEventDelayedFrames(nameof(SendDirectionUpdate), 1);
         }
 
-        protected byte retryCount = 0;
         public void SendDirectionUpdateProcess()
         {
             if(!isInit) return;
