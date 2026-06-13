@@ -195,10 +195,19 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 case 5://[後][中]
                     ReadControllerParametersFrom2e();
                     break;
-                case 6://[中][中]かつ送信方向が1e->2eで決定済
+                case 6://[中][中]　中間車送信方向決定処理
+                    if(canReadFrom1e && canReadFrom2e)
+                    {
+                        if(transport_bool_from1e[0] && transport_bool_from1e[1])//1エンド側から確認
+                        {
+                        }
+                    }
+                    else return;
+                    break;
+                case 7://[中][中]かつ送信方向が1e->2eで決定済
                     ReadControllerParametersFrom1e();
                     break;
-                case 7://[中][中]かつ送信方向が2e->1eで決定済
+                case 8://[中][中]かつ送信方向が2e->1eで決定済
                     ReadControllerParametersFrom2e();
                     break;
                 default:
@@ -210,7 +219,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             //送信処理
             //操作系変数送信
-            if(dataDirectionMode <= 3 || dataDirectionMode == 6 || dataDirectionMode == 7)
+            if(dataDirectionMode <= 3 || dataDirectionMode == 7 || dataDirectionMode == 8)
             {
                 transport_int[0] = notchPos;
                 transport_int[1] = brakeSeg;
@@ -233,7 +242,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             {
                 string dis_text = "";
                 dis_text += "DateDirectionMode: " + dataDirectionMode + "\n";
-                dis_text += "DateDirection: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "未定義") + "\n";
+                dis_text += "DateDirection: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "None") + "\n";
                 dis_text += "canReadFrom1e: " + canReadFrom1e + "\n";
                 dis_text += "canReadFrom2e: " + canReadFrom2e + "\n";
                 dis_text += "notchSegmentLocal: " + notchSegmentLocal + "\n";
@@ -386,13 +395,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             else if(zengoSwSegment2e[0] == 0) transport_bool[0] = false;
             
             //中間車信号方向決定処理　前後切替SW前後とも中位置
-            if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1))
-            {
-                transport_bool_fromFront[0] = false;
-            }
-            else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = false;
+            if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = transport_bool_fromBack[0] = false;
             else transport_bool[1] = true;
-
+            
             //送受信モード決定 dataDirectionMode
             if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 0;
             else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 1;
@@ -400,9 +405,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 3;
             else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 4;
             else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 5;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[0] && transport_bool[1]) dataDirectionMode = 6;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && transport_bool[0] && transport_bool[1]) dataDirectionMode = 7;
-            else if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1) && !transport_bool[1]) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) dataDirectionMode = 8;
+            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 6;//接続待機状態
+            else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) dataDirectionMode = 9;
             
         }
         public void SendDirectionUpdate()
@@ -433,11 +437,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     isConnectedTo2eCoupler[1] = true;
                 }
             }
-
             SendDirectionUpdateProcess();
-
-            if(isConnectedOtherCar[0]) connectedModule_1e.SendDirectionUpdateProcess();
-            if(isConnectedOtherCar[1]) connectedModule_2e.SendDirectionUpdateProcess();
         }
 
         public override void OnOwnershipTransferred(VRC.SDKBase.VRCPlayerApi player)
