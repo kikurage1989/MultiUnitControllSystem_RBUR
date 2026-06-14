@@ -1,5 +1,4 @@
 ﻿
-using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -8,6 +7,7 @@ using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using TMPro; //TextMeshProを扱う際に必要
 using System;//Stringに使用
+using ragecraft.UtilsScript;
 
 //編成の要件
 //Train_PrefabのFCouplerObjがついている方を1エンド側と定義する
@@ -18,19 +18,25 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 {
     public class MultiUnitControllSystem : frou01.RigidBodyTrain.TrainConnectionReciever
     {
+        [SerializeField, Tooltip("車両メッシュコントローラー")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("1エンド側Train")] protected frou01.RigidBodyTrain.Train end1Train;
         [SerializeField, Tooltip("2エンド側Train")] protected frou01.RigidBodyTrain.Train end2Train;
-        [Header("1エンド側")]
+        [Header("1エンド側GAC")]
         [SerializeField] protected Controller_Base notchLever1e;
         [SerializeField] protected Controller_Base brakeLever1e;
         [SerializeField] protected Controller_Base reverser1e;
         [SerializeField] protected Controller_Base zengoSW1e;
-        [Header("2エンド側")]
+        [Header("2エンド側GAC")]
         [SerializeField] protected Controller_Base notchLever2e;
         [SerializeField] protected Controller_Base brakeLever2e;
         [SerializeField] protected Controller_Base reverser2e;
         [SerializeField] protected Controller_Base zengoSW2e;
-
+        [Header("左側（1エンド方向基準）ドアSw")]
+        [SerializeField] protected syncSW_Base _doorSwLeft1e;
+        [SerializeField] protected syncSW_Base _doorSwLeft2e;
+        [Header("右側（1エンド方向基準）ドアSw")]
+        [SerializeField] protected syncSW_Base _doorSwRight1e;
+        [SerializeField] protected syncSW_Base _doorSwRight2e;
         protected int[] notchSegment1e = new int[1];
         protected float[] notchPosition1e = new float[1];
         protected float[] notchNormPosition1e = new float[1];
@@ -48,6 +54,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected float[] brakeNormPosition2e = new float[1];
         protected int[] reverserSegment2e = new int[1];
         [System.NonSerialized] public int[] zengoSwSegment2e = new int[1];
+
+        protected bool[] doorSwLeft1e = new bool[1];
+        protected bool[] doorSwLeft2e = new bool[1];
+        protected bool[] doorSwRight1e = new bool[1];
+        protected bool[] doorSwRight2e = new bool[1];
 
         [System.NonSerialized] public int[] transport_int = new int[5];
         //予約分
@@ -128,6 +139,15 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool isOwnerState;
         protected float updateDeltaTime = 0.01f;//念のため
 
+        //ドア開閉状態キャッシュ
+        protected bool isOpenLeftDoor;
+        protected bool prevIsOpenLeftDoor;
+        protected bool isOpenRightDoor;
+        protected bool prevIsOpenRightDoor;
+        //アニメーションハッシュ
+        protected int isOpenLeftDoorParameterID;//isOpenLeftDoor
+        protected int isOpenRightDoorParameterID;//isOpenRightDoor
+
         //開発用仮実装
         [SerializeField] protected bool debug_flg;
         [SerializeField] protected frou01.RigidBodyTrain.MortorAndWheel _MotorAndWheel;
@@ -155,7 +175,15 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             reverserSegment2e = reverser2e.currentSegment_Exposed;
             zengoSwSegment2e = zengoSW2e.currentSegment_Exposed;
 
+            doorSwLeft1e = _doorSwLeft1e.udonSyncedBool;
+            doorSwLeft2e = _doorSwLeft2e.udonSyncedBool;
+            doorSwRight1e = _doorSwRight1e.udonSyncedBool;
+            doorSwRight2e = _doorSwRight2e.udonSyncedBool;
+
             has2Handle = Utilities.IsValid(brakeLever1e) && Utilities.IsValid(brakeLever2e);
+
+            isOpenLeftDoorParameterID = Animator.StringToHash("isOpenLeftDoor");
+            isOpenRightDoorParameterID = Animator.StringToHash("isOpenRightDoor");
 
             isInit = true;
             //開発用仮実装
@@ -250,6 +278,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 default:
                     break;
             }
+            DoorStateUpdate();
 
             //力行・制動処理
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0]) PowerAndBrakeProcess();
@@ -347,6 +376,21 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             {
                 transport_bool_fromFront[0] = false;
             }
+        }
+
+        //ドア状態更新
+        protected virtual void DoorStateUpdate()
+        {
+            if(debug_flg) Debug.Log("isOpenLeftDoor:" + isOpenLeftDoor + " prevIsOpenLeftDoor:" + prevIsOpenLeftDoor);
+            isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0];
+            if(isOpenLeftDoor != prevIsOpenLeftDoor)
+            {
+                foreach(Animator _meshAnimator in trainMeshAnimators)
+                {
+                    _meshAnimator.SetBool(isOpenLeftDoorParameterID, isOpenLeftDoor);
+                }
+            }
+            prevIsOpenLeftDoor = isOpenLeftDoor;
         }
 
         //MARK:総括制御処理
