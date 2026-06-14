@@ -490,6 +490,22 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     }
                     break;
                 case 8://[中][中]かつ送信方向が2e->1eで決定済
+                    if(canReadFrom1e && canReadFrom2e && transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        //2エンドから前->後、1エンドから後->前を読み取り
+                        isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[0] || transport_bool_Doors_from1e[5];
+                        isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[1] || transport_bool_Doors_from1e[4];
+                        //1エンドへ前->後送信
+                        transport_bool_Doors[0] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[0];
+                        transport_bool_Doors[1] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[1];
+                        // transport_bool_Doors[2] = ;
+                        // transport_bool_Doors[3] = ;
+                        //2エンドへ後->前送信(反転)
+                        transport_bool_Doors[4] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[4];
+                        transport_bool_Doors[5] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[5];
+                        // transport_bool_Doors[6] = false;
+                        // transport_bool_Doors[7] = false;
+                    }
                     break;
                 default:
                     DoorStateUpdate_OnlyMyCar();
