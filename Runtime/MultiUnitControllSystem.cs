@@ -72,46 +72,50 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         // 2　brakeNormPosition　ブレーキハンドル正規化ポジション
 
         [System.NonSerialized] public bool[] transport_bool = new bool[8];
-        //予約分
+        //予約分 2以降は運転台からのみ送信する情報
         // 0　信号方向：　false 1e->2e　True　2e->1e　方向性
         // 1　進行方向決定済：Trueで決定済。運転台とか後端とかはこれで決定
         // 2　EnablePermission　エンジン始動とかパン上げとか
         // 3　ATS_EmerStop
 
-        [System.NonSerialized] public bool[] transport_bool_fromFront = new bool[12];
-        //　前後同時送信し、(いずれかの車両で)という条件を取るためのもの
+        [System.NonSerialized] public bool[] transport_bool_Doors = new bool[8];
+        //ドア専用(方向性があるため)　前後送信し、「いずれかの車両で」という条件を検知するもの
+        // 0　isLeftDoorOpen_forFront
+        // 1　isRightDoorOpen_forFront
+        // 2　isLeftDoorKey_forFront
+        // 3　isRIghtDoorKey_forFront
+        // 4　isLeftDoorOpen_forBack
+        // 5　isRightDoorOpen_forBack
+        // 6　isLeftDoorKey_forBack
+        // 7　isRightDoorKey_forBack
+
+        [System.NonSerialized] public bool[] transport_bool_fromFront = new bool[6];
         // 予約分
         // 0　FrontCheck
-        // 1　BuzzerPushedFromFront
-        // 2　isSitsunaitouFromFront
-        // 3　isLeftDoorOpenFromFront
-        // 4　isLeftDoorKeyFromFront
-        // 5　isRIghtDoorOpenFromFront
-        // 6　isRIghtDoorKeyFromFront
+        // 1　BuzzerPushed_fromFront
+        // 2　isSitsunaitou_fromFront
 
-        [System.NonSerialized] public bool[] transport_bool_fromBack = new bool[12];
+        [System.NonSerialized] public bool[] transport_bool_fromBack = new bool[6];
         // 予約分
         // 0　BackCheck
-        // 1　BuzzerPushedFromBack
-        // 2　isSitsunaitouFromBack
-        // 3　isLeftDoorOpenFromBack
-        // 4　isLeftDoorKeyFromBack
-        // 5　isRIghtDoorOpenFromBack
-        // 6　isRIghtDoorKeyFromBack
+        // 1　BuzzerPushed_fromBack
+        // 2　isSitsunaitou_fromBack
 
         protected int[] transport_int_from1e = new int[5];
         protected float[] transport_float_from1e = new float[8];
         protected bool[] transport_bool_from1e = new bool[8];
-        protected bool[] transport_bool_fromFront_from1e = new bool[12];
-        protected bool[] transport_bool_fromBack_from1e = new bool[12];
+        protected bool[] transport_bool_fromFront_from1e = new bool[6];
+        protected bool[] transport_bool_fromBack_from1e = new bool[6];
         protected int[] zengoSwSegment_from1e = new int[1];
+        protected bool[] transport_bool_Doors_from1e = new bool[8];
 
         protected int[] transport_int_from2e = new int[5];
         protected float[] transport_float_from2e = new float[8];
         protected bool[] transport_bool_from2e = new bool[8];
-        protected bool[] transport_bool_fromFront_from2e = new bool[12];
-        protected bool[] transport_bool_fromBack_from2e = new bool[12];
+        protected bool[] transport_bool_fromFront_from2e = new bool[6];
+        protected bool[] transport_bool_fromBack_from2e = new bool[6];
         protected int[] zengoSwSegment_from2e = new int[1];
+        protected bool[] transport_bool_Doors_from2e = new bool[8];
         
         protected bool[] isConnectedOtherCar = new bool[2]; //通信接続がされているかのフラグ 0:1エンド側 1:2エンド側
         protected bool[] isConnectedTo2eCoupler = new bool[2]; //接続した相手車両の接続カプラが2エンド側か　Falseで1エンド側 0:自車1エンド側 1:自車2エンド側 isConnectedOtherCarと組み合わせること
@@ -142,8 +146,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         //ドア開閉状態キャッシュ
         protected bool isOpenLeftDoor;
         protected bool prevIsOpenLeftDoor;
+        protected bool isOpenLeftDoorOtherCar;
         protected bool isOpenRightDoor;
         protected bool prevIsOpenRightDoor;
+        protected bool isOpenRightDoorOtherCar;
         //アニメーションハッシュ
         protected int isOpenLeftDoorParameterID;//isOpenLeftDoor
         protected int isOpenRightDoorParameterID;//isOpenRightDoor
@@ -241,11 +247,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                             dataDirectionMode = 8;
                         }
                     }
-                    // dataDirectionMode == 6設定時に前後チェックリセット済のため不要
-                    // else
-                    // {
-                    //     transport_bool_fromFront[0] = transport_bool_fromBack[0] = false;
-                    // }
                     break;
                 case 7://[中][中]かつ送信方向が1e->2eで決定済
                     ReadControllerParametersFrom1e();
@@ -276,15 +277,17 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     transport_bool_fromBack[0] = canReadFrom1e ? transport_bool_fromBack_from1e[0] : false;
                     break;
                 default:
+                    if(isOpenLeftDoorOtherCar) isOpenLeftDoorOtherCar = false;
+                    if(isOpenRightDoorOtherCar) isOpenRightDoorOtherCar = false;
                     break;
             }
+
             DoorStateUpdate();
 
             //力行・制動処理
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0]) PowerAndBrakeProcess();
 
-            //送信処理
-            //操作系変数送信
+            //前->後 送信処理
             if(dataDirectionMode <= 3 || dataDirectionMode == 7 || dataDirectionMode == 8)
             {
                 transport_int[0] = notchPos;
@@ -292,11 +295,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_float[1] = brakePos;
                 transport_float[2] = brakeNormPos;
                 //方向性信号
-                if(!transport_bool[0]) //2e側へ送信
+                if(!transport_bool[0]) //2e側へ送信 反転
                 {
                     transport_float[0] = -1f * powerDirection;
                 }
-                else //1e側へ送信
+                else //1e側へ送信　順方向
                 {
                     transport_float[0] = powerDirection;
                 }
@@ -379,10 +382,121 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
 
         //ドア状態更新
-        protected virtual void DoorStateUpdate()
+        protected void DoorStateUpdate()
         {
-            if(debug_flg) Debug.Log("isOpenLeftDoor:" + isOpenLeftDoor + " prevIsOpenLeftDoor:" + prevIsOpenLeftDoor);
-            isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0];
+            switch(dataDirectionMode)
+            {
+                case 0://[前][後]
+                    DoorStateUpdate_OnlyMyCar();
+                    break;
+                case 1://[前][中]
+                    if(canReadFrom2e && transport_bool_fromBack[0])
+                    {
+                        //2エンドからの、後->前のみ読み取り
+                        isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[4];
+                        isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[5];
+                        //2エンドへ前->後送信(反転)
+                        transport_bool_Doors[0] = doorSwRight1e[0] || doorSwRight2e[0];
+                        transport_bool_Doors[1] = doorSwLeft1e[0] || doorSwLeft2e[0];
+                        // transport_bool_Doors[2] = ;
+                        // transport_bool_Doors[3] = ;
+                        //後->前は送信しない
+                        transport_bool_Doors[4] = false;
+                        transport_bool_Doors[5] = false;
+                        transport_bool_Doors[6] = false;
+                        transport_bool_Doors[7] = false;
+                    }
+                    else DoorStateUpdate_OnlyMyCar();
+                    break;
+                case 2://[後][前]
+                    DoorStateUpdate_OnlyMyCar();
+                    break;
+                case 3://[中][前]
+                    if(canReadFrom1e && transport_bool_fromBack[0])
+                    {
+                        //1エンドからの、後->前のみ読み取り
+                        isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[5];
+                        isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[4];
+                        //1エンドへ前->後送信
+                        transport_bool_Doors[0] = doorSwLeft1e[0] || doorSwLeft2e[0];
+                        transport_bool_Doors[1] = doorSwRight1e[0] || doorSwRight2e[0];
+                        // transport_bool_Doors[2] = ;
+                        // transport_bool_Doors[3] = ;
+                        //後->前は送信しない
+                        transport_bool_Doors[4] = false;
+                        transport_bool_Doors[5] = false;
+                        transport_bool_Doors[6] = false;
+                        transport_bool_Doors[7] = false;
+                    }
+                    else DoorStateUpdate_OnlyMyCar();
+                    break;
+                case 4://[中][後]
+                    if(canReadFrom1e && transport_bool_fromFront[0])
+                    {
+                        //1エンドからの、前->後ろのみ読み取り
+                        isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[1];
+                        isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[0];
+                        //1エンドへ前->後送信（後端なので無し)
+                        transport_bool_Doors[0] = false;
+                        transport_bool_Doors[1] = false;
+                        transport_bool_Doors[2] = false;
+                        transport_bool_Doors[3] = false;
+                        //1エンドへ後->前送信
+                        transport_bool_Doors[4] = doorSwLeft1e[0] || doorSwLeft2e[0];
+                        transport_bool_Doors[5] = doorSwRight1e[0] || doorSwRight2e[0];
+                        // transport_bool_Doors[6] = false;
+                        // transport_bool_Doors[7] = false;
+                    }
+                    else DoorStateUpdate_OnlyMyCar();
+                    break;
+                case 5://[後][中]
+                    if(canReadFrom2e && transport_bool_fromFront[0])
+                    {
+                        //2エンドからの、前->後ろのみ読み取り
+                        isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[0];
+                        isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[1];
+                        //2エンドへ前->後送信（後端なので無し)
+                        transport_bool_Doors[0] = false;
+                        transport_bool_Doors[1] = false;
+                        transport_bool_Doors[2] = false;
+                        transport_bool_Doors[3] = false;
+                        //2エンドへ後->前送信
+                        transport_bool_Doors[4] = doorSwRight1e[0] || doorSwRight2e[0];
+                        transport_bool_Doors[5] = doorSwLeft1e[0] || doorSwLeft2e[0];
+                        // transport_bool_Doors[6] = false;
+                        // transport_bool_Doors[7] = false;
+                    }
+                    else DoorStateUpdate_OnlyMyCar();
+                    break;
+                case 6://[中][中]
+                    DoorStateUpdate_OnlyMyCar();
+                    break;
+                case 7://[中][中]かつ送信方向が1e->2eで決定済
+                    if(canReadFrom1e && canReadFrom2e && transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        //1エンドから前->後、2エンドから後->前を読み取り
+                        isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[1] || transport_bool_Doors_from2e[4];
+                        isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[0] || transport_bool_Doors_from2e[5];
+                        //2エンドへ前->後送信(反転)
+                        transport_bool_Doors[0] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[0];
+                        transport_bool_Doors[1] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[1];
+                        // transport_bool_Doors[2] = ;
+                        // transport_bool_Doors[3] = ;
+                        //1エンドへ後->前
+                        transport_bool_Doors[4] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[4];
+                        transport_bool_Doors[5] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[5];
+                        // transport_bool_Doors[6] = false;
+                        // transport_bool_Doors[7] = false;
+                    }
+                    break;
+                case 8://[中][中]かつ送信方向が2e->1eで決定済
+                    break;
+                default:
+                    DoorStateUpdate_OnlyMyCar();
+                    break;
+
+            }
+            //左扉
             if(isOpenLeftDoor != prevIsOpenLeftDoor)
             {
                 foreach(Animator _meshAnimator in trainMeshAnimators)
@@ -391,6 +505,27 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 }
             }
             prevIsOpenLeftDoor = isOpenLeftDoor;
+
+            //右扉
+            if(isOpenRightDoor != prevIsOpenRightDoor)
+            {
+                foreach(Animator _meshAnimator in trainMeshAnimators)
+                {
+                    _meshAnimator.SetBool(isOpenRightDoorParameterID, isOpenRightDoor);
+                }
+            }
+            prevIsOpenRightDoor = isOpenRightDoor;
+        }
+        protected void DoorStateUpdate_OnlyMyCar()//
+        {
+            if(isOpenLeftDoorOtherCar) isOpenLeftDoorOtherCar = false;
+            if(isOpenRightDoorOtherCar) isOpenRightDoorOtherCar = false;
+            isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0];
+            isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0];
+            
+            int i;
+            for(i = 0; i < transport_bool_Doors.Length; i++) transport_bool_Doors[0] = false;
+            
         }
 
         //MARK:総括制御処理
@@ -418,6 +553,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_from1e = connectedModule_1e.transport_bool;
                         transport_bool_fromFront_from1e = connectedModule_1e.transport_bool_fromFront;
                         transport_bool_fromBack_from1e = connectedModule_1e.transport_bool_fromBack;
+                        transport_bool_Doors_from1e = connectedModule_1e.transport_bool_Doors;
                     }
                     else //2e側接続処理
                     {
@@ -429,6 +565,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_from2e = connectedModule_2e.transport_bool;
                         transport_bool_fromFront_from2e = connectedModule_2e.transport_bool_fromFront;
                         transport_bool_fromBack_from2e = connectedModule_2e.transport_bool_fromBack;
+                        transport_bool_Doors_from2e = connectedModule_2e.transport_bool_Doors;
                     }
                 }
             }
@@ -444,6 +581,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     transport_bool_fromFront_from1e = null;
                     transport_bool_fromBack_from1e = null;
                     zengoSwSegment_from1e = null;
+                    transport_bool_Doors_from1e = null;
                 }
                 else
                 {
@@ -455,6 +593,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     transport_bool_fromFront_from2e = null;
                     transport_bool_fromBack_from2e = null;
                     zengoSwSegment_from2e = null;
+                    transport_bool_Doors_from2e = null;
                 }
             }
             ChangeZengoSwEvent();
@@ -490,8 +629,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             //中間車信号方向決定処理　前後切替SW前後とも中位置
             if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = transport_bool_fromBack[0] = false;
             else transport_bool[1] = true;
-
-            if(debug_flg) Debug.Log("チェック前：zengoSwSegment1e[0]:" + zengoSwSegment1e[0] + " zengoSwSegment2e[0]:" + zengoSwSegment2e[0]);
 
             //送受信モード決定 dataDirectionMode
             if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 0;
