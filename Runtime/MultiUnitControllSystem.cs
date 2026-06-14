@@ -168,7 +168,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             if(!isInit) return;
             updateDeltaTime = Time.deltaTime;
 
-            //ハンドル位置読み取り
+            //ハンドル位置読み取り、フロント・バックチェック
             switch(dataDirectionMode)
             {
                 case 0://[前][後]
@@ -179,6 +179,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     brakeNormPosLocal = brakeNormPosition1e[0];
                     powerDirection = reverserSegment1e[0] - 1f;
                     DecideNotchAndBrakePos();
+                    if(dataDirectionMode == 1) transport_bool_fromBack[0] = canReadFrom2e ? transport_bool_fromBack_from2e[0] : false;
                     break;
                 case 2://[後][前]
                 case 3://[中][前]
@@ -188,6 +189,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     brakeNormPosLocal = brakeNormPosition2e[0];
                     powerDirection = -1f * (reverserSegment2e[0] - 1f);
                     DecideNotchAndBrakePos();
+                    if(dataDirectionMode == 3) transport_bool_fromBack[0] = canReadFrom1e ? transport_bool_fromBack_from1e[0] : false;
                     break;
                 case 4://[中][後]
                     ReadControllerParametersFrom1e();
@@ -211,31 +213,46 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                             dataDirectionMode = 8;
                         }
                     }
+                    // dataDirectionMode == 6設定時に前後チェックリセット済のため不要
+                    // else
+                    // {
+                    //     transport_bool_fromFront[0] = transport_bool_fromBack[0] = false;
+                    // }
                     break;
                 case 7://[中][中]かつ送信方向が1e->2eで決定済
                     ReadControllerParametersFrom1e();
-                    if(!transport_bool_fromFront_from1e[0])
+                    if(!canReadFrom1e)
                     {
-                        transport_bool_fromFront[0] = false;
                         dataDirectionMode = 6;
                         transport_bool[1] = false;
                     }
+                    else if(!transport_bool_fromFront_from1e[0]) //ぬるぽ可能性のためcanReadFrom1eを確認してからこのチェックを実施
+                    {
+                        dataDirectionMode = 6;
+                        transport_bool[1] = false;
+                    }
+                    transport_bool_fromBack[0] = canReadFrom2e ? transport_bool_fromBack_from2e[0] : false;
                     break;
                 case 8://[中][中]かつ送信方向が2e->1eで決定済
                     ReadControllerParametersFrom2e();
-                    if(!transport_bool_fromFront_from2e[0])
+                    if(!canReadFrom2e)
                     {
-                        transport_bool_fromFront[0] = false;
                         dataDirectionMode = 6;
                         transport_bool[1] = false;
                     }
+                    else if(!transport_bool_fromFront_from2e[0]) //ぬるぽ可能性のためcanReadFrom2eを確認してからこのチェックを実施
+                    {
+                        dataDirectionMode = 6;
+                        transport_bool[1] = false;
+                    }
+                    transport_bool_fromBack[0] = canReadFrom1e ? transport_bool_fromBack_from1e[0] : false;
                     break;
                 default:
                     break;
             }
 
             //力行・制動処理
-            if(isOwnerState) PowerAndBrakeProcess();
+            if(transport_bool_fromFront[0] && transport_bool_fromBack[0]) PowerAndBrakeProcess();
 
             //送信処理
             //操作系変数送信
@@ -291,11 +308,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         protected virtual void PowerAndBrakeProcess()
         {
-            //Update内でオーナーのみ実行
+            //Update内で実行
             //Time.deltaTimeの値はupdateDeltaTimeに格納済
             //開発用仮実装
-            // outputMortorForce[0] = powerDirection * 10000f * notchPos;
-            // outputBrakeForce[0] = (brakeSeg == 0 ? 0f : 70000f * brakeNormPos);
+            outputMortorForce[0] = powerDirection * 10000f * notchPos;
+            outputBrakeForce[0] = (brakeSeg == 0 ? 0f : 70000f * brakeNormPos);
         }
 
         //操作系変数読み取り処理
@@ -310,6 +327,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 brakeNormPos = transport_float_from1e[2];
                 powerDirection = -1f * transport_float_from1e[0];
             }
+            else
+            {
+                transport_bool_fromFront[0] = false;
+            }
         }
         protected void ReadControllerParametersFrom2e()
         {
@@ -321,6 +342,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 brakePos = transport_float_from2e[1];
                 brakeNormPos = transport_float_from2e[2];
                 powerDirection = transport_float_from2e[0];
+            }
+            else
+            {
+                transport_bool_fromFront[0] = false;
             }
         }
 
@@ -410,11 +435,13 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             transport_bool_fromFront[0] = (zengoSwSegment1e[0] == 2) || (zengoSwSegment2e[0] == 2);
             if(zengoSwSegment1e[0] == 2) transport_bool[0] = false;
             else if(zengoSwSegment2e[0] == 2) transport_bool[0] = true;
+            if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 2))) transport_bool_fromBack[0] = false;
 
             //前後切替SW：後　確認
             transport_bool_fromBack[0] = (zengoSwSegment1e[0] == 0) || (zengoSwSegment2e[0] == 0);
             if(zengoSwSegment1e[0] == 0) transport_bool[0] = true;
             else if(zengoSwSegment2e[0] == 0) transport_bool[0] = false;
+            if(((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 0))) transport_bool_fromFront[0] = false;
             
             //中間車信号方向決定処理　前後切替SW前後とも中位置
             if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = transport_bool_fromBack[0] = false;
