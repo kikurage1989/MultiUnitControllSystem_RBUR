@@ -90,17 +90,21 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         // 6　isLeftDoorKey_forBack
         // 7　isRightDoorKey_forBack
 
-        [System.NonSerialized] public bool[] transport_bool_fromFront = new bool[6];
+        [System.NonSerialized] public bool[] transport_bool_fromFront = new bool[8];
         // 予約分
         // 0　FrontCheck
         // 1　BuzzerPushed_fromFront
         // 2　isSitsunaitou_fromFront
+        // 3  1e側の隣車へFrontを渡せる
+        // 4  2e側の隣車へFrontを渡せる
 
-        [System.NonSerialized] public bool[] transport_bool_fromBack = new bool[6];
+        [System.NonSerialized] public bool[] transport_bool_fromBack = new bool[8];
         // 予約分
         // 0　BackCheck
         // 1　BuzzerPushed_fromBack
         // 2　isSitsunaitou_fromBack
+        // 3  1e側の隣車へBackを渡せる
+        // 4  2e側の隣車へBackを渡せる
 
         protected int[] transport_int_from1e = new int[5];
         protected float[] transport_float_from1e = new float[8];
@@ -214,7 +218,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     brakeNormPosLocal = brakeNormPosition1e[0];
                     powerDirection = reverserSegment1e[0] - 1f;
                     DecideNotchAndBrakePos();
-                    if(dataDirectionMode == 1) transport_bool_fromBack[0] = canReadFrom2e ? transport_bool_fromBack_from2e[0] : false;
                     break;
                 case 2://[後][前]
                 case 3://[中][前]
@@ -224,58 +227,14 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     brakeNormPosLocal = brakeNormPosition2e[0];
                     powerDirection = -1f * (reverserSegment2e[0] - 1f);
                     DecideNotchAndBrakePos();
-                    if(dataDirectionMode == 3) transport_bool_fromBack[0] = canReadFrom1e ? transport_bool_fromBack_from1e[0] : false;
                     break;
                 case 4://[中][後]
+                case 7://[中][中]かつ送信方向が1e->2eで決定済
                     ReadControllerParametersFrom1e();
                     break;
                 case 5://[後][中]
-                    ReadControllerParametersFrom2e();
-                    break;
-                case 6://[中][中]　中間車送信方向決定処理
-                    if(canReadFrom1e && canReadFrom2e)
-                    {
-                        if(transport_bool_from1e[1] && transport_bool_fromFront_from1e[0])//1エンド側から確認
-                        {
-                            transport_bool[0] = false;
-                            transport_bool[1] = true;
-                            dataDirectionMode = 7;
-                        }
-                        else if(transport_bool_from2e[1] && transport_bool_fromFront_from2e[0])//2エンド側確認
-                        {
-                            transport_bool[0] = true;
-                            transport_bool[1] = true;
-                            dataDirectionMode = 8;
-                        }
-                    }
-                    break;
-                case 7://[中][中]かつ送信方向が1e->2eで決定済
-                    ReadControllerParametersFrom1e();
-                    if(!canReadFrom1e)
-                    {
-                        dataDirectionMode = 6;
-                        transport_bool[1] = false;
-                    }
-                    else if(!transport_bool_fromFront_from1e[0]) //ぬるぽ可能性のためcanReadFrom1eを確認してからこのチェックを実施
-                    {
-                        dataDirectionMode = 6;
-                        transport_bool[1] = false;
-                    }
-                    transport_bool_fromBack[0] = canReadFrom2e ? transport_bool_fromBack_from2e[0] : false;
-                    break;
                 case 8://[中][中]かつ送信方向が2e->1eで決定済
                     ReadControllerParametersFrom2e();
-                    if(!canReadFrom2e)
-                    {
-                        dataDirectionMode = 6;
-                        transport_bool[1] = false;
-                    }
-                    else if(!transport_bool_fromFront_from2e[0]) //ぬるぽ可能性のためcanReadFrom2eを確認してからこのチェックを実施
-                    {
-                        dataDirectionMode = 6;
-                        transport_bool[1] = false;
-                    }
-                    transport_bool_fromBack[0] = canReadFrom1e ? transport_bool_fromBack_from1e[0] : false;
                     break;
                 default:
                     if(isOpenLeftDoorOtherCar) isOpenLeftDoorOtherCar = false;
@@ -539,10 +498,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             if(isOpenRightDoorOtherCar) isOpenRightDoorOtherCar = false;
             isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0];
             isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0];
-            
-            int i;
-            for(i = 0; i < transport_bool_Doors.Length; i++) transport_bool_Doors[0] = false;
-            
         }
 
         //MARK:総括制御処理
@@ -616,50 +571,24 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             ChangeZengoSwEvent();
         }
         
+        protected bool directionRecalcQueued;
         public void ChangeZengoSwEvent()
         {
-            SendCustomEventDelayedFrames(nameof(SendDirectionUpdate), 1);
+            RequestDirectionRecalc();
         }
 
-        public void SendDirectionUpdateProcess()
+        public void RequestDirectionRecalc()
         {
-            if(!isInit) return;
-            //読み出し可能フラグ更新 canReadFrom1e canReadFrom2e
-            if(isConnectedOtherCar[0]) canReadFrom1e = (zengoSwSegment1e[0] == 1) && (zengoSwSegment_from1e[0] == 1);
-            else canReadFrom1e = false;
-            if(isConnectedOtherCar[1]) canReadFrom2e = (zengoSwSegment2e[0] == 1) && (zengoSwSegment_from2e[0] == 1);
-            else canReadFrom2e = false;
+            if(directionRecalcQueued) return;
 
-            //前位置もしくは後位置があるなら信号方向は決定してよい
-            //前後切替SW：前　確認
-            transport_bool_fromFront[0] = (zengoSwSegment1e[0] == 2) || (zengoSwSegment2e[0] == 2);
-            if(zengoSwSegment1e[0] == 2) transport_bool[0] = false;
-            else if(zengoSwSegment2e[0] == 2) transport_bool[0] = true;
-            if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 2))) transport_bool_fromBack[0] = false;
-
-            //前後切替SW：後　確認
-            transport_bool_fromBack[0] = (zengoSwSegment1e[0] == 0) || (zengoSwSegment2e[0] == 0);
-            if(zengoSwSegment1e[0] == 0) transport_bool[0] = true;
-            else if(zengoSwSegment2e[0] == 0) transport_bool[0] = false;
-            if(((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 0))) transport_bool_fromFront[0] = false;
-            
-            //中間車信号方向決定処理　前後切替SW前後とも中位置
-            if(((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1)) || ((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) transport_bool[1] = transport_bool_fromFront[0] = transport_bool_fromBack[0] = false;
-            else transport_bool[1] = true;
-
-            //送受信モード決定 dataDirectionMode
-            if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 0;
-            else if((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 1;
-            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 2;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 2)) dataDirectionMode = 3;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 0)) dataDirectionMode = 4;
-            else if((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 5;
-            else if((zengoSwSegment1e[0] == 1) && (zengoSwSegment2e[0] == 1)) dataDirectionMode = 6;//接続待機状態
-            else if(((zengoSwSegment1e[0] == 2) && (zengoSwSegment2e[0] == 2)) || ((zengoSwSegment1e[0] == 0) && (zengoSwSegment2e[0] == 0))) dataDirectionMode = 9;
-            
+            directionRecalcQueued = true;
+            SendCustomEventDelayedFrames(nameof(DirectionRecalcTick), 1);
         }
-        public void SendDirectionUpdate()
+
+        public void DirectionRecalcTick()
         {
+            directionRecalcQueued = false;
+
             if(isConnectedOtherCar[0])
             {
                 if(end1Train.connectedTrain_F.connectedTrain_F == end1Train)
@@ -686,10 +615,256 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     isConnectedTo2eCoupler[1] = true;
                 }
             }
-            SendDirectionUpdateProcess();
+            bool changed = EvaluateDirectionState();
 
-            if(isConnectedOtherCar[0]) connectedModule_1e.SendDirectionUpdateProcess();
-            if(isConnectedOtherCar[1]) connectedModule_2e.SendDirectionUpdateProcess();
+            if(changed)
+            {
+                if(isConnectedOtherCar[0])
+                {
+                    connectedModule_1e.RequestDirectionRecalc();
+                }
+                if(isConnectedOtherCar[1])
+                {
+                    connectedModule_2e.RequestDirectionRecalc();
+                }
+            }
+        }
+        protected bool EvaluateDirectionState()
+        {
+            byte oldMode = dataDirectionMode;
+            bool oldDirection = transport_bool[0];
+            bool oldDecided = transport_bool[1];
+
+            bool oldFront = transport_bool_fromFront[0];
+            bool oldBack = transport_bool_fromBack[0];
+
+            bool oldFrontExport1e = transport_bool_fromFront[3];
+            bool oldFrontExport2e = transport_bool_fromFront[4];
+            bool oldBackExport1e = transport_bool_fromBack[3];
+            bool oldBackExport2e = transport_bool_fromBack[4];
+
+            int sw1 = zengoSwSegment1e[0];
+            int sw2 = zengoSwSegment2e[0];
+
+            //読み出し可能フラグ更新 canReadFrom1e canReadFrom2e
+            if(isConnectedOtherCar[0]) canReadFrom1e = (zengoSwSegment1e[0] == 1) && (zengoSwSegment_from1e[0] == 1);
+            else canReadFrom1e = false;
+            if(isConnectedOtherCar[1]) canReadFrom2e = (zengoSwSegment2e[0] == 1) && (zengoSwSegment_from2e[0] == 1);
+            else canReadFrom2e = false;
+
+            bool frontFrom1e = FrontComesFrom1eSide();
+            bool frontFrom2e = FrontComesFrom2eSide();
+            bool backFrom1e = BackComesFrom1eSide();
+            bool backFrom2e = BackComesFrom2eSide();
+
+            // いったん全クリア
+            transport_bool[0] = false;
+            transport_bool[1] = false;
+
+            transport_bool_fromFront[0] = false;
+            transport_bool_fromBack[0] = false;
+
+            transport_bool_fromFront[3] = false;
+            transport_bool_fromFront[4] = false;
+            transport_bool_fromBack[3] = false;
+            transport_bool_fromBack[4] = false;
+
+            dataDirectionMode = 9;
+
+            // 矛盾系
+            if((sw1 == 2 && sw2 == 2) || (sw1 == 0 && sw2 == 0))
+            {
+                dataDirectionMode = 9;
+            }
+            // [前][後]
+            else if(sw1 == 2 && sw2 == 0)
+            {
+                dataDirectionMode = 0;
+                transport_bool[0] = false; // 1e -> 2e
+                transport_bool[1] = true;
+                transport_bool_fromFront[0] = true;
+                transport_bool_fromBack[0] = true;
+            }
+            // [後][前]
+            else if(sw1 == 0 && sw2 == 2)
+            {
+                dataDirectionMode = 2;
+                transport_bool[0] = true; // 2e -> 1e
+                transport_bool[1] = true;
+                transport_bool_fromFront[0] = true;
+                transport_bool_fromBack[0] = true;
+            }
+            // [前][中]
+            else if(sw1 == 2 && sw2 == 1)
+            {
+                dataDirectionMode = 1;
+                transport_bool[0] = false; // 1e -> 2e
+                transport_bool[1] = true;
+
+                transport_bool_fromFront[0] = true;
+                transport_bool_fromBack[0] = backFrom2e;
+
+                // 2e側の中間接続へFrontを渡せる
+                transport_bool_fromFront[4] = true;
+
+                // 2e側からBackが来ていれば、編成としてBack成立
+                transport_bool_fromBack[0] = backFrom2e;
+            }
+            // [中][前]
+            else if(sw1 == 1 && sw2 == 2)
+            {
+                dataDirectionMode = 3;
+                transport_bool[0] = true; // 2e -> 1e
+                transport_bool[1] = true;
+
+                transport_bool_fromFront[0] = true;
+                transport_bool_fromBack[0] = backFrom1e;
+
+                // 1e側へFrontを渡せる
+                transport_bool_fromFront[3] = true;
+
+                transport_bool_fromBack[0] = backFrom1e;
+            }
+            // [中][後]
+            else if(sw1 == 1 && sw2 == 0)
+            {
+                dataDirectionMode = 4;
+                transport_bool[0] = false; // 1e -> 2e
+                transport_bool[1] = frontFrom1e;
+
+                transport_bool_fromFront[0] = frontFrom1e;
+                transport_bool_fromBack[0] = true;
+
+                // 1e側へBackを返せる
+                transport_bool_fromBack[3] = true;
+            }
+            // [後][中]
+            else if(sw1 == 0 && sw2 == 1)
+            {
+                dataDirectionMode = 5;
+                transport_bool[0] = true; // 2e -> 1e
+                transport_bool[1] = frontFrom2e;
+
+                transport_bool_fromFront[0] = frontFrom2e;
+                transport_bool_fromBack[0] = true;
+
+                // 2e側へBackを返せる
+                transport_bool_fromBack[4] = true;
+            }
+            // [中][中]
+            else if(sw1 == 1 && sw2 == 1)
+            {
+                bool conflictFront = frontFrom1e && frontFrom2e;
+
+                if(conflictFront)
+                {
+                    dataDirectionMode = 9;
+                    transport_bool[1] = false;
+                }
+                else if(frontFrom1e)
+                {
+                    // 1e側にFrontがあるので 1e -> 2e
+                    dataDirectionMode = 7;
+                    transport_bool[0] = false;
+                    transport_bool[1] = true;
+
+                    transport_bool_fromFront[0] = true;
+                    transport_bool_fromBack[0] = backFrom2e;
+
+                    // 2e側へFrontを渡す
+                    transport_bool_fromFront[4] = true;
+
+                    // 2e側からBackが来ていれば1e側へ返せる
+                    if(backFrom2e)
+                    {
+                        transport_bool_fromBack[3] = true;
+                    }
+                }
+                else if(frontFrom2e)
+                {
+                    // 2e側にFrontがあるので 2e -> 1e
+                    dataDirectionMode = 8;
+                    transport_bool[0] = true;
+                    transport_bool[1] = true;
+
+                    transport_bool_fromFront[0] = true;
+                    transport_bool_fromBack[0] = backFrom1e;
+
+                    // 1e側へFrontを渡す
+                    transport_bool_fromFront[3] = true;
+
+                    // 1e側からBackが来ていれば2e側へ返せる
+                    if(backFrom1e)
+                    {
+                        transport_bool_fromBack[4] = true;
+                    }
+                }
+                else
+                {
+                    dataDirectionMode = 6;
+                    transport_bool[1] = false;
+                }
+            }
+
+            return oldMode != dataDirectionMode
+                || oldDirection != transport_bool[0]
+                || oldDecided != transport_bool[1]
+                || oldFront != transport_bool_fromFront[0]
+                || oldBack != transport_bool_fromBack[0]
+                || oldFrontExport1e != transport_bool_fromFront[3]
+                || oldFrontExport2e != transport_bool_fromFront[4]
+                || oldBackExport1e != transport_bool_fromBack[3]
+                || oldBackExport2e != transport_bool_fromBack[4];
+        }
+
+        protected bool FrontComesFrom1eSide()
+        {
+            if(!canReadFrom1e) return false;
+
+            // 相手2eに接続しているなら、相手の2e側Front出力を見る
+            if(isConnectedTo2eCoupler[0])
+            {
+                return connectedModule_1e.transport_bool_fromFront[4];
+            }
+
+            // 相手1eに接続しているなら、相手の1e側Front出力を見る
+            return connectedModule_1e.transport_bool_fromFront[3];
+        }
+
+        protected bool FrontComesFrom2eSide()
+        {
+            if(!canReadFrom2e) return false;
+
+            if(isConnectedTo2eCoupler[1])
+            {
+                return connectedModule_2e.transport_bool_fromFront[4];
+            }
+
+            return connectedModule_2e.transport_bool_fromFront[3];
+        }
+
+        protected bool BackComesFrom1eSide()
+        {
+            if(!canReadFrom1e) return false;
+
+            if(isConnectedTo2eCoupler[0])
+            {
+                return connectedModule_1e.transport_bool_fromBack[4];
+            }
+
+            return connectedModule_1e.transport_bool_fromBack[3];
+        }
+
+        protected bool BackComesFrom2eSide()
+        {
+            if(!canReadFrom2e) return false;
+
+            if(isConnectedTo2eCoupler[1])
+            {
+                return connectedModule_2e.transport_bool_fromBack[4];
+            }
+
+            return connectedModule_2e.transport_bool_fromBack[3];
         }
 
         public override void OnOwnershipTransferred(VRC.SDKBase.VRCPlayerApi player)
