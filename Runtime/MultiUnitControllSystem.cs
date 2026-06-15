@@ -8,6 +8,7 @@ using VRC.SDKBase;
 using TMPro; //TextMeshProを扱う際に必要
 using System;//Stringに使用
 using ragecraft.UtilsScript;
+using frou01.GrabController;
 
 //編成の要件
 //Train_PrefabのFCouplerObjがついている方を1エンド側と定義する
