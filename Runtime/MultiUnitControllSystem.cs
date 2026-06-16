@@ -35,15 +35,19 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [Header("左側（1エンド方向基準）ドアSw")]
         [SerializeField] protected syncSW_Base _doorSwLeft1e;
         [SerializeField] protected syncSW_Base _doorSwLeft2e;
-        [Header("左側（1エンド方向基準）ドアSw鍵判定")]
-        [SerializeField] protected Collider _doorKeySwLeft1e;
-        [SerializeField] protected Collider _doorKeySwLeft2e;
+        [Header("左側（1エンド方向基準）ドアSw鍵")]
+        [SerializeField] protected syncSW_Base _keySw1eL;
+        protected Collider _doorKeySwCol1eL;
+        [SerializeField] protected syncSW_Base _keySw2eL;
+        protected Collider _doorKeySwCol2eL;
         [Header("右側（1エンド方向基準）ドアSw")]
         [SerializeField] protected syncSW_Base _doorSwRight1e;
         [SerializeField] protected syncSW_Base _doorSwRight2e;
-        [Header("右側（1エンド方向基準）ドアSw鍵判定")]
-        [SerializeField] protected Collider _doorKeySwRight1e;
-        [SerializeField] protected Collider _doorKeySwRight2e;
+        [Header("右側（1エンド方向基準）ドアSw鍵")]
+        [SerializeField] protected syncSW_Base _keySw1eR;
+        protected Collider _doorKeySwCol1eR;
+        [SerializeField] protected syncSW_Base _keySw2eR;
+        protected Collider _doorKeySwCol2eR;
 
         protected int[] notchSegment1e = new int[1];
         protected float[] notchPosition1e = new float[1];
@@ -67,6 +71,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool[] doorSwLeft2e = new bool[1];
         protected bool[] doorSwRight1e = new bool[1];
         protected bool[] doorSwRight2e = new bool[1];
+
+        protected bool[] keySw1eL = new bool[1];
+        protected bool[] keySw2eL = new bool[1];
+        protected bool[] keySw1eR = new bool[1];
+        protected bool[] keySw2eR = new bool[1];
 
         [System.NonSerialized] public int[] transport_int = new int[5];
         //予約分
@@ -163,6 +172,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool isOpenRightDoor;
         protected bool prevIsOpenRightDoor;
         protected bool isOpenRightDoorOtherCar;
+        //ドア鍵状態キャッシュ
+        protected bool isEnabledKeyOtherL;
+        protected bool isEnabledKeyOtherR;
         //アニメーションハッシュ
         protected int isOpenLeftDoorParameterID;//isOpenLeftDoor
         protected int isOpenRightDoorParameterID;//isOpenRightDoor
@@ -198,6 +210,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             doorSwLeft2e = _doorSwLeft2e.udonSyncedBool;
             doorSwRight1e = _doorSwRight1e.udonSyncedBool;
             doorSwRight2e = _doorSwRight2e.udonSyncedBool;
+
+            keySw1eL = _keySw1eL.udonSyncedBool;
+            keySw2eL = _keySw2eL.udonSyncedBool;
+            keySw1eR = _keySw1eR.udonSyncedBool;
+            keySw2eR = _keySw2eR.udonSyncedBool;
+            
+            _doorKeySwCol1eL = _keySw1eL.GetComponent<Collider>();
+            _doorKeySwCol2eL = _keySw2eL.GetComponent<Collider>();
+            _doorKeySwCol1eR = _keySw1eR.GetComponent<Collider>();
+            _doorKeySwCol2eR = _keySw2eR.GetComponent<Collider>();
 
             has2Handle = Utilities.IsValid(brakeLever1e) && Utilities.IsValid(brakeLever2e);
 
@@ -297,7 +319,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             }
         }
 
-        protected virtual void DecideNotchAndBrakePos() //速度制限やATS等の非常制動など
+        protected virtual void DecideNotchAndBrakePos() //速度制限やATS等の非常制動など　base.DecideNotchAndBrakePos()
         {
             notchPos = notchSegmentLocal;
             brakeSeg = brakeSegmentLocal;
@@ -352,7 +374,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [NetworkCallable]
         public void DoorStateUpdate()
         {
-            if(doorStateUpdateQueued) return;
+            if(doorStateUpdateQueued || !isInit) return;
             doorStateUpdateQueued = true;
             switch(dataDirectionMode)
             {
