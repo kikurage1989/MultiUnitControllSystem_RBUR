@@ -14,9 +14,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 {
     public class SyncDoorKeySW : syncSW_Base
     {
-        [Header("ドア鍵自体のコライダーOnOffはMultiUnitControllSystemにて制御する")]
-        [Header("↓のDoorSwColliderのみ設定すること")]
+        [Header("ドア鍵自体のコライダーOnOffはMultiUnitControllSystemにて制御されます")]
+        [Header("↓のDoorSwColliderとEventReceiverUdonのみ設定すること")]
         [SerializeField] protected Collider doorSwCollider;
+        [SerializeField] protected MultiUnitControllSystem eventReceiverMUCS;
         protected MeshRenderer doorKeySwMesh;
 
         protected override void Start()
@@ -32,6 +33,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 Debug.LogError("DoorKeySW:MeshRenderer NULL!");
                 return;
             }
+            if(eventReceiverMUCS == null)
+            {
+                Debug.LogError("DoorKeySW:eventReceiverMUCS NULL!");
+                return;
+            }
             doorKeySwMesh.enabled = doorSwCollider.enabled = false;
             base.Start();
         }
@@ -39,6 +45,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected override void SomeUpdate()
         {
             doorKeySwMesh.enabled = doorSwCollider.enabled = udonSyncedBool[0];
+            eventReceiverMUCS.DoorStateUpdate();
         }
     }
 }

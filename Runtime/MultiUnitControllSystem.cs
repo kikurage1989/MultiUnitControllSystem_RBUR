@@ -242,8 +242,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     break;
             }
 
-            DoorStateUpdate();
-
             //力行・制動処理
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0]) PowerAndBrakeProcess();
 
@@ -342,8 +340,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
 
         //ドア状態更新
-        protected void DoorStateUpdate()
+        protected bool doorStateUpdateQueued;
+        [NetworkCallable]
+        public void DoorStateUpdate()
         {
+            if(doorStateUpdateQueued) return;
+            doorStateUpdateQueued = true;
             switch(dataDirectionMode)
             {
                 case 0://[前][後]
@@ -491,6 +493,13 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 }
             }
             prevIsOpenRightDoor = isOpenRightDoor;
+            //呼び出し
+            if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
+            {
+                if(canReadFrom1e) connectedModule_1e.DoorStateUpdate();
+                if(canReadFrom2e) connectedModule_2e.DoorStateUpdate();
+            }
+            doorStateUpdateQueued = false;
         }
         protected void DoorStateUpdate_OnlyMyCar()//
         {
@@ -572,11 +581,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         
         protected bool directionRecalcQueued;
+        [NetworkCallable]
         public void ChangeZengoSwEvent()
         {
             RequestDirectionRecalc();
         }
-
+        [NetworkCallable]
         public void RequestDirectionRecalc()
         {
             if(directionRecalcQueued) return;
@@ -584,7 +594,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             directionRecalcQueued = true;
             SendCustomEventDelayedFrames(nameof(DirectionRecalcTick), 1);
         }
-
+        [NetworkCallable]
         public void DirectionRecalcTick()
         {
             directionRecalcQueued = false;

@@ -41,6 +41,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8761315334641779476}
     m_Modifications:
+    - target: {fileID: 20525602948598813, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 20525602948598813, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - target: {fileID: 2393006179848292184, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 2393006179848292184, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - target: {fileID: 2735323154186145005, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 2735323154186145005, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - target: {fileID: 3310235743495738281, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 3310235743495738281, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
     - target: {fileID: 3512449159522025062, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -85,7 +101,19 @@ PrefabInstance:
       propertyPath: m_Name
       value: DoorSw2eAsm
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 5963198268352352771, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 5963198268352352771, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - target: {fileID: 9023263113806330538, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 9023263113806330538, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    m_RemovedComponents:
+    - {fileID: 2393006179848292184, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - {fileID: 9023263113806330538, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - {fileID: 1045854656455024685, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - {fileID: 8710750478567442049, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -147,7 +175,35 @@ PrefabInstance:
       propertyPath: m_Name
       value: DoorSw1eAsm
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 1173186532801018624, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 1173186532801018624, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - target: {fileID: 1626940533113924186, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 1626940533113924186, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - target: {fileID: 2727873754792101409, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 2727873754792101409, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - target: {fileID: 3045308737440970496, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 3045308737440970496, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - target: {fileID: 3498266393486596436, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 3498266393486596436, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - target: {fileID: 6807584841354685792, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 6807584841354685792, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    m_RemovedComponents:
+    - {fileID: 3498266393486596436, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - {fileID: 1173186532801018624, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - {fileID: 7357308932068370849, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - {fileID: 6446048221442189317, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
