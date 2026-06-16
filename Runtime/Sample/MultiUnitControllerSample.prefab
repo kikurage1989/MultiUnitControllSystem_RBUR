@@ -324,8 +324,12 @@ MonoBehaviour:
   zengoSW2e: {fileID: 3138344976432007634}
   _doorSwLeft1e: {fileID: 1562896904225145616}
   _doorSwLeft2e: {fileID: 2953401682802814896}
+  _doorKeySwLeft1e: {fileID: 8786405887574201396}
+  _doorKeySwLeft2e: {fileID: 263325344927897152}
   _doorSwRight1e: {fileID: 7028707267091208560}
   _doorSwRight2e: {fileID: 6326800784906268186}
+  _doorKeySwRight1e: {fileID: 4513568514397785443}
+  _doorKeySwRight2e: {fileID: 1322927113433072943}
   notchSegmentLocal: 0
   brakeSegmentLocal: 0
   brakePositionLocal: 0
@@ -2209,6 +2213,16 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4966498907875191829}
   m_SourcePrefab: {fileID: 100100000, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+--- !u!65 &263325344927897152 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 5713044953259446963, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+  m_PrefabInstance: {fileID: 5543743246071940339}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &1322927113433072943 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 6824270854138855900, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+  m_PrefabInstance: {fileID: 5543743246071940339}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1562896904225145616 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6440098436077520867, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
@@ -2274,6 +2288,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8761315334641779476, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
   m_PrefabInstance: {fileID: 5543743246071940339}
   m_PrefabAsset: {fileID: 0}
+--- !u!65 &4513568514397785443 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 8236027888227813776, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+  m_PrefabInstance: {fileID: 5543743246071940339}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &6326800784906268186 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1955154699910310633, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
@@ -2296,6 +2315,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 079492f170d6b3f45a2b5cfdf1d5907a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &8786405887574201396 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 3819264165924835527, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+  m_PrefabInstance: {fileID: 5543743246071940339}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5576898520433856264
 PrefabInstance:
   m_ObjectHideFlags: 0

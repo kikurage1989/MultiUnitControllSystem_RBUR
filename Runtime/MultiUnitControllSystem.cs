@@ -35,9 +35,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [Header("左側（1エンド方向基準）ドアSw")]
         [SerializeField] protected syncSW_Base _doorSwLeft1e;
         [SerializeField] protected syncSW_Base _doorSwLeft2e;
+        [Header("左側（1エンド方向基準）ドアSw鍵判定")]
+        [SerializeField] protected Collider _doorKeySwLeft1e;
+        [SerializeField] protected Collider _doorKeySwLeft2e;
         [Header("右側（1エンド方向基準）ドアSw")]
         [SerializeField] protected syncSW_Base _doorSwRight1e;
         [SerializeField] protected syncSW_Base _doorSwRight2e;
+        [Header("右側（1エンド方向基準）ドアSw鍵判定")]
+        [SerializeField] protected Collider _doorKeySwRight1e;
+        [SerializeField] protected Collider _doorKeySwRight2e;
+
         protected int[] notchSegment1e = new int[1];
         protected float[] notchPosition1e = new float[1];
         protected float[] notchNormPosition1e = new float[1];
@@ -125,6 +132,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool[] isConnectedOtherCar = new bool[2]; //通信接続がされているかのフラグ 0:1エンド側 1:2エンド側
         protected bool[] isConnectedTo2eCoupler = new bool[2]; //接続した相手車両の接続カプラが2エンド側か　Falseで1エンド側 0:自車1エンド側 1:自車2エンド側 isConnectedOtherCarと組み合わせること
 
+        [Header("デバッグ表示")]
         [SerializeField] protected int notchSegmentLocal; //ノッチハンドルから読み取り
         // [SerializeField] protected float notchPositionLocal; //ノッチハンドルから読み取り
         // [SerializeField] protected float notchNormPosLocal; //ノッチハンドルから読み取り
