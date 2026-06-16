@@ -297,14 +297,14 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             }
         }
 
-        protected virtual void DecideNotchAndBrakePos()
+        protected virtual void DecideNotchAndBrakePos() //速度制限やATS等の非常制動など
         {
             notchPos = notchSegmentLocal;
             brakeSeg = brakeSegmentLocal;
             brakePos = brakePositionLocal;
             brakeNormPos = brakeNormPosLocal;
         }
-        protected virtual void PowerAndBrakeProcess()
+        protected virtual void PowerAndBrakeProcess() //これをoverrideして各車種の開発
         {
             //Update内で実行
             //Time.deltaTimeの値はupdateDeltaTimeに格納済
