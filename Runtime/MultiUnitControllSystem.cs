@@ -168,13 +168,20 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         //ドア開閉状態キャッシュ
         protected bool isOpenLeftDoor;
         protected bool prevIsOpenLeftDoor;
-        protected bool isOpenLeftDoorOtherCar;
         protected bool isOpenRightDoor;
         protected bool prevIsOpenRightDoor;
-        protected bool isOpenRightDoorOtherCar;
         //ドア鍵状態キャッシュ
-        protected bool isEnabledKeyOtherL;
-        protected bool isEnabledKeyOtherR;
+        protected bool isEnableKey1eL = true;
+        protected bool isEnableKey2eL = true;
+        protected bool isEnableKey1eR = true;
+        protected bool isEnableKey2eR = true;
+        
+        protected bool prevIsEnableKey1eL = true;
+        protected bool prevIsEnableKey2eL = true;
+        protected bool prevIsEnableKey1eR = true;
+        protected bool prevIsEnableKey2eR = true;
+        protected bool isEnabledKeyOtherL = true;
+        protected bool isEnabledKeyOtherR = true;
         //アニメーションハッシュ
         protected int isOpenLeftDoorParameterID;//isOpenLeftDoor
         protected int isOpenRightDoorParameterID;//isOpenRightDoor
@@ -267,8 +274,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     ReadControllerParametersFrom2e();
                     break;
                 default:
-                    if(isOpenLeftDoorOtherCar) isOpenLeftDoorOtherCar = false;
-                    if(isOpenRightDoorOtherCar) isOpenRightDoorOtherCar = false;
                     break;
             }
 
@@ -513,7 +518,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 }
             }
             prevIsOpenLeftDoor = isOpenLeftDoor;
-
+            _doorKeySwCol1eL.enabled = isEnableKey1eL;
+            _doorKeySwCol2eL.enabled = isEnableKey2eL;
             //右扉
             if(isOpenRightDoor != prevIsOpenRightDoor)
             {
@@ -523,6 +529,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 }
             }
             prevIsOpenRightDoor = isOpenRightDoor;
+            _doorKeySwCol1eR.enabled = isEnableKey1eR;
+            _doorKeySwCol2eR.enabled = isEnableKey2eR;
+            
             //呼び出し
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
             {
@@ -533,10 +542,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         protected void DoorStateUpdate_OnlyMyCar()//
         {
-            if(isOpenLeftDoorOtherCar) isOpenLeftDoorOtherCar = false;
-            if(isOpenRightDoorOtherCar) isOpenRightDoorOtherCar = false;
             isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0];
             isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0];
+            isEnableKey1eL = keySw1eL[0] || !keySw2eL[0];
+            isEnableKey2eL = keySw2eL[0] || !keySw1eL[0];
+            isEnableKey1eR = keySw1eR[0] || !keySw2eR[0];
+            isEnableKey2eR = keySw2eR[0] || !keySw1eR[0];
         }
 
         //MARK:総括制御処理
