@@ -281,7 +281,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0]) PowerAndBrakeProcess();
 
             //前->後 送信処理
-            if(dataDirectionMode <= 3 || dataDirectionMode == 7 || dataDirectionMode == 8)
+            if(dataDirectionMode == 1 || dataDirectionMode == 3 || dataDirectionMode == 7 || dataDirectionMode == 8)
             {
                 transport_int[0] = notchPos;
                 transport_int[1] = brakeSeg;
@@ -646,6 +646,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         public void ChangeZengoSwEvent()
         {
             RequestDirectionRecalc();
+            DoorStateUpdate();
         }
         [NetworkCallable]
         public void RequestDirectionRecalc()
