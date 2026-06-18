@@ -19,7 +19,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 {
     public class MultiUnitControllSystem : frou01.RigidBodyTrain.TrainConnectionReciever
     {
-        [SerializeField, Tooltip("車両メッシュコントローラー")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
+        [SerializeField, Tooltip("車両コントローラー ブザー音出力")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
+        [SerializeField, Tooltip("車両メッシュコントローラー ドア開閉、室内灯")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("1エンド側Train")] protected frou01.RigidBodyTrain.Train end1Train;
         [SerializeField, Tooltip("2エンド側Train")] protected frou01.RigidBodyTrain.Train end2Train;
         [Header("1エンド側GAC")]
@@ -33,21 +34,24 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected Controller_Base reverser2e;
         [SerializeField] protected Controller_Base zengoSW2e;
         [Header("左側（1エンド方向基準）ドアSw")]
-        [SerializeField] protected syncSW_Base _doorSwLeft1e;
-        [SerializeField] protected syncSW_Base _doorSwLeft2e;
+        [SerializeField] protected SyncDoorSW _doorSwLeft1e;
+        [SerializeField] protected SyncDoorSW _doorSwLeft2e;
         [Header("左側（1エンド方向基準）ドアSw鍵")]
-        [SerializeField] protected syncSW_Base _keySw1eL;
+        [SerializeField] protected SyncDoorKeySW _keySw1eL;
         protected Collider _doorKeySwCol1eL;
-        [SerializeField] protected syncSW_Base _keySw2eL;
+        [SerializeField] protected SyncDoorKeySW _keySw2eL;
         protected Collider _doorKeySwCol2eL;
         [Header("右側（1エンド方向基準）ドアSw")]
-        [SerializeField] protected syncSW_Base _doorSwRight1e;
-        [SerializeField] protected syncSW_Base _doorSwRight2e;
+        [SerializeField] protected SyncDoorSW _doorSwRight1e;
+        [SerializeField] protected SyncDoorSW _doorSwRight2e;
         [Header("右側（1エンド方向基準）ドアSw鍵")]
-        [SerializeField] protected syncSW_Base _keySw1eR;
+        [SerializeField] protected SyncDoorKeySW _keySw1eR;
         protected Collider _doorKeySwCol1eR;
-        [SerializeField] protected syncSW_Base _keySw2eR;
+        [SerializeField] protected SyncDoorKeySW _keySw2eR;
         protected Collider _doorKeySwCol2eR;
+        [Header("ブザーSw ※増やしたい場合はChildSWを追加 isBuzzerSwPushed")]
+        [SerializeField] protected syncSW_Base buzzerSW;
+        protected bool prevIsBuzzerSwPushed;
 
         protected int[] notchSegment1e = new int[1];
         protected float[] notchPosition1e = new float[1];
