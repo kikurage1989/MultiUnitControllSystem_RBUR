@@ -392,11 +392,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //2エンドからの、後->前のみ読み取り
                         isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[4];
                         isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[5];
+                        
+                        isEnableKey1eL = keySw1eL[0] || (!keySw2eL[0] && !transport_bool_Doors_from2e[6]);
+                        isEnableKey2eL = keySw2eL[0] || (!keySw1eL[0] && !transport_bool_Doors_from2e[6]);
+                        isEnableKey1eR = keySw1eR[0] || (!keySw2eR[0] && !transport_bool_Doors_from2e[7]);
+                        isEnableKey2eR = keySw2eR[0] || (!keySw1eR[0] && !transport_bool_Doors_from2e[7]);
                         //2エンドへ前->後送信(反転)
                         transport_bool_Doors[0] = doorSwRight1e[0] || doorSwRight2e[0];
                         transport_bool_Doors[1] = doorSwLeft1e[0] || doorSwLeft2e[0];
-                        // transport_bool_Doors[2] = ;
-                        // transport_bool_Doors[3] = ;
+                        transport_bool_Doors[2] = keySw1eR[0] || keySw2eR[0];
+                        transport_bool_Doors[3] = keySw1eL[0] || keySw2eL[0];
                         //後->前は送信しない
                         transport_bool_Doors[4] = false;
                         transport_bool_Doors[5] = false;
@@ -414,11 +419,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //1エンドからの、後->前のみ読み取り
                         isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[5];
                         isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[4];
+                        
+                        isEnableKey1eL = keySw1eL[0] || (!keySw2eL[0] && !transport_bool_Doors_from1e[7]);
+                        isEnableKey2eL = keySw2eL[0] || (!keySw1eL[0] && !transport_bool_Doors_from1e[7]);
+                        isEnableKey1eR = keySw1eR[0] || (!keySw2eR[0] && !transport_bool_Doors_from1e[6]);
+                        isEnableKey2eR = keySw2eR[0] || (!keySw1eR[0] && !transport_bool_Doors_from1e[6]);
                         //1エンドへ前->後送信
                         transport_bool_Doors[0] = doorSwLeft1e[0] || doorSwLeft2e[0];
                         transport_bool_Doors[1] = doorSwRight1e[0] || doorSwRight2e[0];
-                        // transport_bool_Doors[2] = ;
-                        // transport_bool_Doors[3] = ;
+                        transport_bool_Doors[2] = keySw1eL[0] || keySw2eL[0];
+                        transport_bool_Doors[3] = keySw1eR[0] || keySw2eR[0];
                         //後->前は送信しない
                         transport_bool_Doors[4] = false;
                         transport_bool_Doors[5] = false;
@@ -433,6 +443,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //1エンドからの、前->後ろのみ読み取り
                         isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[1];
                         isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[0];
+                        
+                        isEnableKey1eL = keySw1eL[0] || (!keySw2eL[0] && !transport_bool_Doors_from1e[3]);
+                        isEnableKey2eL = keySw2eL[0] || (!keySw1eL[0] && !transport_bool_Doors_from1e[3]);
+                        isEnableKey1eR = keySw1eR[0] || (!keySw2eR[0] && !transport_bool_Doors_from1e[2]);
+                        isEnableKey2eR = keySw2eR[0] || (!keySw1eR[0] && !transport_bool_Doors_from1e[2]);
                         //1エンドへ前->後送信（後端なので無し)
                         transport_bool_Doors[0] = false;
                         transport_bool_Doors[1] = false;
@@ -441,8 +456,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //1エンドへ後->前送信
                         transport_bool_Doors[4] = doorSwLeft1e[0] || doorSwLeft2e[0];
                         transport_bool_Doors[5] = doorSwRight1e[0] || doorSwRight2e[0];
-                        // transport_bool_Doors[6] = false;
-                        // transport_bool_Doors[7] = false;
+                        transport_bool_Doors[6] = keySw1eL[0] || keySw2eL[0];
+                        transport_bool_Doors[7] = keySw1eR[0] || keySw2eR[0];
                     }
                     else DoorStateUpdate_OnlyMyCar();
                     break;
@@ -452,6 +467,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //2エンドからの、前->後ろのみ読み取り
                         isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[0];
                         isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[1];
+                        
+                        isEnableKey1eL = keySw1eL[0] || (!keySw2eL[0] && !transport_bool_Doors_from2e[2]);
+                        isEnableKey2eL = keySw2eL[0] || (!keySw1eL[0] && !transport_bool_Doors_from2e[2]);
+                        isEnableKey1eR = keySw1eR[0] || (!keySw2eR[0] && !transport_bool_Doors_from2e[3]);
+                        isEnableKey2eR = keySw2eR[0] || (!keySw1eR[0] && !transport_bool_Doors_from2e[3]);
                         //2エンドへ前->後送信（後端なので無し)
                         transport_bool_Doors[0] = false;
                         transport_bool_Doors[1] = false;
@@ -460,8 +480,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //2エンドへ後->前送信
                         transport_bool_Doors[4] = doorSwRight1e[0] || doorSwRight2e[0];
                         transport_bool_Doors[5] = doorSwLeft1e[0] || doorSwLeft2e[0];
-                        // transport_bool_Doors[6] = false;
-                        // transport_bool_Doors[7] = false;
+                        transport_bool_Doors[6] = keySw1eR[0] || keySw2eR[0];
+                        transport_bool_Doors[7] = keySw1eL[0] || keySw2eL[0];
                     }
                     else DoorStateUpdate_OnlyMyCar();
                     break;
@@ -531,7 +551,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             prevIsOpenRightDoor = isOpenRightDoor;
             _doorKeySwCol1eR.enabled = isEnableKey1eR;
             _doorKeySwCol2eR.enabled = isEnableKey2eR;
-            
+
             //呼び出し
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
             {
