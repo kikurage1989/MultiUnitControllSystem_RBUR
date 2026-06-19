@@ -180,44 +180,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: OpenSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: CloseSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
       propertyPath: anchorBody
       value: 
       objectReference: {fileID: 5205676640292799210}
     - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: unLockSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: connectSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: unCoupleSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: disconnectForce
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
       propertyPath: ConnectedTrainID
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: missConnectSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: CouplerAudioSource
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 920409449037452229, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
       propertyPath: serializationData.Prefab
@@ -400,44 +368,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: OpenSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: CloseSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
       propertyPath: anchorBody
       value: 
       objectReference: {fileID: 2920912705118026898}
     - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: unLockSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: connectSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: unCoupleSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: disconnectForce
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
       propertyPath: ConnectedTrainID
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: missConnectSound
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
-      propertyPath: CouplerAudioSource
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7814482539821002173, guid: d59134e83d1cc3b46a977aee9c825575, type: 3}
       propertyPath: serializationData.Prefab

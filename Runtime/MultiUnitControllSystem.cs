@@ -49,8 +49,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected Collider _doorKeySwCol1eR;
         [SerializeField] protected SyncDoorKeySW _keySw2eR;
         protected Collider _doorKeySwCol2eR;
-        [Header("ブザーSw ※増やしたい場合はChildSWを追加 isBuzzerSwPushed")]
+        [Header("ブザーSw")]
         [SerializeField] protected syncSW_Base buzzerSW;
+        [SerializeField] protected AudioSource[] buzzerSnd;
+        protected bool isBuzzerSwPushedAnyCar;
         protected bool prevIsBuzzerSwPushed;
 
         protected int[] notchSegment1e = new int[1];
@@ -80,6 +82,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool[] keySw2eL = new bool[1];
         protected bool[] keySw1eR = new bool[1];
         protected bool[] keySw2eR = new bool[1];
+
+        protected bool[] isBuzzerSw = new bool[1];
 
         [System.NonSerialized] public int[] transport_int = new int[5];
         //予約分
@@ -147,8 +151,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
         [Header("デバッグ表示")]
         [SerializeField] protected int notchSegmentLocal; //ノッチハンドルから読み取り
-        // [SerializeField] protected float notchPositionLocal; //ノッチハンドルから読み取り
-        // [SerializeField] protected float notchNormPosLocal; //ノッチハンドルから読み取り
         [SerializeField] protected int brakeSegmentLocal; //ブレーキハンドルから読み取り
         [SerializeField] protected float brakePositionLocal; //ブレーキハンドルから読み取り
         [SerializeField] protected float brakeNormPosLocal; //ブレーキハンドルから読み取り
@@ -200,8 +202,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         {
             isOwnerState = Networking.IsOwner(this.gameObject);
             notchSegment1e = notchLever1e.currentSegment_Exposed;
-            // notchPosition1e = notchLever1e.controllerPosition_Exposed;
-            // notchNormPosition1e = notchLever1e.currentNormalizePosition_Exposed;
             brakeSegment1e = brakeLever1e.currentSegment_Exposed;
             brakePosition1e = brakeLever1e.controllerPosition_Exposed;
             brakeNormPosition1e = brakeLever1e.currentNormalizePosition_Exposed;
@@ -209,8 +209,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             zengoSwSegment1e = zengoSW1e.currentSegment_Exposed;
 
             notchSegment2e = notchLever2e.currentSegment_Exposed;
-            // notchPosition2e = notchLever2e.controllerPosition_Exposed;
-            // notchNormPosition2e = notchLever2e.currentNormalizePosition_Exposed;
             brakeSegment2e = brakeLever2e.currentSegment_Exposed;
             brakePosition2e = brakeLever2e.controllerPosition_Exposed;
             brakeNormPosition2e = brakeLever2e.currentNormalizePosition_Exposed;
@@ -237,6 +235,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             isOpenLeftDoorParameterID = Animator.StringToHash("isOpenLeftDoor");
             isOpenRightDoorParameterID = Animator.StringToHash("isOpenRightDoor");
 
+            isBuzzerSw = buzzerSW.udonSyncedBool;
+
             isInit = true;
             //開発用仮実装
             outputMortorForce = _MotorAndWheel.MortorForce;
@@ -253,21 +253,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             {
                 case 0://[前][後]
                 case 1://[前][中]
-                    notchSegmentLocal = notchSegment1e[0];
-                    brakeSegmentLocal = brakeSegment1e[0];
-                    brakePositionLocal = brakePosition1e[0];
-                    brakeNormPosLocal = brakeNormPosition1e[0];
-                    powerDirection = reverserSegment1e[0] - 1f;
-                    DecideNotchAndBrakePos();
+                    ControllProcess1e();
                     break;
                 case 2://[後][前]
                 case 3://[中][前]
-                    notchSegmentLocal = notchSegment2e[0];
-                    brakeSegmentLocal = brakeSegment2e[0];
-                    brakePositionLocal = brakePosition2e[0];
-                    brakeNormPosLocal = brakeNormPosition2e[0];
-                    powerDirection = -1f * (reverserSegment2e[0] - 1f);
-                    DecideNotchAndBrakePos();
+                    ControllProcess2e();
                     break;
                 case 4://[中][後]
                 case 7://[中][中]かつ送信方向が1e->2eで決定済
@@ -280,6 +270,13 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 default:
                     break;
             }
+            //ブザー音
+            if(isBuzzerSwPushedAnyCar != prevIsBuzzerSwPushed)
+            {
+                if(isBuzzerSwPushedAnyCar) foreach(AudioSource _buzzerSnd in buzzerSnd) _buzzerSnd.Play();
+                else foreach(AudioSource _buzzerSnd in buzzerSnd) _buzzerSnd.Stop();
+            }
+            prevIsBuzzerSwPushed = isBuzzerSwPushedAnyCar;
 
             //力行・制動処理
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0]) PowerAndBrakeProcess();
@@ -344,7 +341,29 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             outputBrakeForce[0] = (brakeSeg == 0 ? 0f : 70000f * brakeNormPos);
         }
 
-        //操作系変数読み取り処理
+        //制御車　コントローラー読み取り処理
+        protected void ControllProcess1e()
+        {
+            notchSegmentLocal = notchSegment1e[0];
+            brakeSegmentLocal = brakeSegment1e[0];
+            brakePositionLocal = brakePosition1e[0];
+            brakeNormPosLocal = brakeNormPosition1e[0];
+            powerDirection = reverserSegment1e[0] - 1f;
+            DecideNotchAndBrakePos();
+            isBuzzerSwPushedAnyCar = isBuzzerSw[0];
+        }
+        protected void ControllProcess2e()
+        {
+            notchSegmentLocal = notchSegment2e[0];
+            brakeSegmentLocal = brakeSegment2e[0];
+            brakePositionLocal = brakePosition2e[0];
+            brakeNormPosLocal = brakeNormPosition2e[0];
+            powerDirection = -1f * (reverserSegment2e[0] - 1f);
+            DecideNotchAndBrakePos();
+            isBuzzerSwPushedAnyCar = isBuzzerSw[0];
+        }
+
+        //被制御車　操作系変数読み取り処理
         protected void ReadControllerParametersFrom1e()
         {
             if(canReadFrom1e && transport_bool_fromFront_from1e[0])
@@ -355,10 +374,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 brakePos = transport_float_from1e[1];
                 brakeNormPos = transport_float_from1e[2];
                 powerDirection = -1f * transport_float_from1e[0];
+                isBuzzerSwPushedAnyCar = isBuzzerSw[0];
             }
             else
             {
                 transport_bool_fromFront[0] = false;
+                isBuzzerSwPushedAnyCar = false;
             }
         }
         protected void ReadControllerParametersFrom2e()
@@ -371,10 +392,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 brakePos = transport_float_from2e[1];
                 brakeNormPos = transport_float_from2e[2];
                 powerDirection = transport_float_from2e[0];
+                isBuzzerSwPushedAnyCar = isBuzzerSw[0];
             }
             else
             {
                 transport_bool_fromFront[0] = false;
+                isBuzzerSwPushedAnyCar = false;
             }
         }
 
