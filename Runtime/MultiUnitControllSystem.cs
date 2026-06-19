@@ -498,16 +498,21 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //1エンドから前->後、2エンドから後->前を読み取り
                         isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[1] || transport_bool_Doors_from2e[4];
                         isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[0] || transport_bool_Doors_from2e[5];
+                        
+                        isEnableKey1eL = keySw1eL[0] || (!keySw2eL[0] && !transport_bool_Doors_from1e[3] && !transport_bool_Doors_from2e[6]);
+                        isEnableKey2eL = keySw2eL[0] || (!keySw1eL[0] && !transport_bool_Doors_from1e[3] && !transport_bool_Doors_from2e[6]);
+                        isEnableKey1eR = keySw1eR[0] || (!keySw2eR[0] && !transport_bool_Doors_from1e[2] && !transport_bool_Doors_from2e[7]);
+                        isEnableKey2eR = keySw2eR[0] || (!keySw1eR[0] && !transport_bool_Doors_from1e[2] && !transport_bool_Doors_from2e[7]);
                         //2エンドへ前->後送信(反転)
                         transport_bool_Doors[0] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[0];
                         transport_bool_Doors[1] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[1];
-                        // transport_bool_Doors[2] = ;
-                        // transport_bool_Doors[3] = ;
+                        transport_bool_Doors[2] = keySw1eR[0] || keySw2eR[0] || transport_bool_Doors_from1e[2];
+                        transport_bool_Doors[3] = keySw1eL[0] || keySw2eL[0] || transport_bool_Doors_from1e[3];
                         //1エンドへ後->前
                         transport_bool_Doors[4] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[4];
                         transport_bool_Doors[5] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[5];
-                        // transport_bool_Doors[6] = false;
-                        // transport_bool_Doors[7] = false;
+                        transport_bool_Doors[6] = keySw1eL[0] || keySw2eL[0] || transport_bool_Doors_from2e[6];
+                        transport_bool_Doors[7] = keySw1eR[0] || keySw2eR[0] || transport_bool_Doors_from2e[7];
                     }
                     break;
                 case 8://[中][中]かつ送信方向が2e->1eで決定済
@@ -516,16 +521,21 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         //2エンドから前->後、1エンドから後->前を読み取り
                         isOpenLeftDoor = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[0] || transport_bool_Doors_from1e[5];
                         isOpenRightDoor = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[1] || transport_bool_Doors_from1e[4];
+
+                        isEnableKey1eL = keySw1eL[0] || (!keySw2eL[0] && !transport_bool_Doors_from1e[7] && !transport_bool_Doors_from2e[2]);
+                        isEnableKey2eL = keySw2eL[0] || (!keySw1eL[0] && !transport_bool_Doors_from1e[7] && !transport_bool_Doors_from2e[2]);
+                        isEnableKey1eR = keySw1eR[0] || (!keySw2eR[0] && !transport_bool_Doors_from1e[6] && !transport_bool_Doors_from2e[3]);
+                        isEnableKey2eR = keySw2eR[0] || (!keySw1eR[0] && !transport_bool_Doors_from1e[6] && !transport_bool_Doors_from2e[3]);
                         //1エンドへ前->後送信
                         transport_bool_Doors[0] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from2e[0];
                         transport_bool_Doors[1] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from2e[1];
-                        // transport_bool_Doors[2] = ;
-                        // transport_bool_Doors[3] = ;
+                        transport_bool_Doors[2] = keySw1eL[0] || keySw2eL[0] || transport_bool_Doors_from2e[2];
+                        transport_bool_Doors[3] = keySw1eR[0] || keySw2eR[0] || transport_bool_Doors_from2e[3];
                         //2エンドへ後->前送信(反転)
                         transport_bool_Doors[4] = doorSwRight1e[0] || doorSwRight2e[0] || transport_bool_Doors_from1e[4];
                         transport_bool_Doors[5] = doorSwLeft1e[0] || doorSwLeft2e[0] || transport_bool_Doors_from1e[5];
-                        // transport_bool_Doors[6] = false;
-                        // transport_bool_Doors[7] = false;
+                        transport_bool_Doors[6] = keySw1eR[0] || keySw2eR[0] || transport_bool_Doors_from1e[6];
+                        transport_bool_Doors[7] = keySw1eL[0] || keySw2eL[0] || transport_bool_Doors_from1e[7];
                     }
                     break;
                 default:
