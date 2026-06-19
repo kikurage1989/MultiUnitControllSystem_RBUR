@@ -247,27 +247,78 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         {
             if(!isInit) return;
             updateDeltaTime = Time.deltaTime;
-
+            isBuzzerSwPushedAnyCar = isBuzzerSw[0];
             //ハンドル位置読み取り、フロント・バックチェック
             switch(dataDirectionMode)
             {
                 case 0://[前][後]
+                    ControllProcess1e();
+                    break;
                 case 1://[前][中]
+                    if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar;
+                        isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromBack_from2e[1]);
+                    }
+                    else
+                    {
+                        isBuzzerSwPushedAnyCar = false;
+                        transport_bool_fromBack[1] = false;
+                    }
                     ControllProcess1e();
                     break;
                 case 2://[後][前]
+                    ControllProcess2e();
+                    break;
                 case 3://[中][前]
+                    if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar;
+                        isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromBack_from1e[1]);
+                    }
+                    else
+                    {
+                        isBuzzerSwPushedAnyCar = false;
+                        transport_bool_fromFront[1] = false;
+                    }
                     ControllProcess2e();
                     break;
                 case 4://[中][後]
+                    if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar;
+                        isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromFront_from1e[1]);
+                    }
+                    else
+                    {
+                        isBuzzerSwPushedAnyCar = false;
+                        transport_bool_fromBack[1] = false;
+                    }
+                    ReadControllerParametersFrom1e();
+                    break;
                 case 7://[中][中]かつ送信方向が1e->2eで決定済
                     ReadControllerParametersFrom1e();
                     break;
                 case 5://[後][中]
+                    if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar;
+                        isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromFront_from2e[1]);
+                    }
+                    else
+                    {
+                        isBuzzerSwPushedAnyCar = false;
+                        transport_bool_fromBack[1] = false;
+                    }
+                    ReadControllerParametersFrom2e();
+                    break;
                 case 8://[中][中]かつ送信方向が2e->1eで決定済
                     ReadControllerParametersFrom2e();
                     break;
                 default:
+                    if(isBuzzerSwPushedAnyCar) isBuzzerSwPushedAnyCar = false;
+                    if(transport_bool_fromFront[1]) transport_bool_fromFront[1] = false;
+                    if(transport_bool_fromBack[1]) transport_bool_fromBack[1] = false;
                     break;
             }
             //ブザー音
@@ -350,7 +401,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             brakeNormPosLocal = brakeNormPosition1e[0];
             powerDirection = reverserSegment1e[0] - 1f;
             DecideNotchAndBrakePos();
-            isBuzzerSwPushedAnyCar = isBuzzerSw[0];
         }
         protected void ControllProcess2e()
         {
@@ -360,7 +410,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             brakeNormPosLocal = brakeNormPosition2e[0];
             powerDirection = -1f * (reverserSegment2e[0] - 1f);
             DecideNotchAndBrakePos();
-            isBuzzerSwPushedAnyCar = isBuzzerSw[0];
         }
 
         //被制御車　操作系変数読み取り処理
@@ -374,12 +423,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 brakePos = transport_float_from1e[1];
                 brakeNormPos = transport_float_from1e[2];
                 powerDirection = -1f * transport_float_from1e[0];
-                isBuzzerSwPushedAnyCar = isBuzzerSw[0];
             }
             else
             {
                 transport_bool_fromFront[0] = false;
-                isBuzzerSwPushedAnyCar = false;
             }
         }
         protected void ReadControllerParametersFrom2e()
@@ -392,12 +439,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 brakePos = transport_float_from2e[1];
                 brakeNormPos = transport_float_from2e[2];
                 powerDirection = transport_float_from2e[0];
-                isBuzzerSwPushedAnyCar = isBuzzerSw[0];
             }
             else
             {
                 transport_bool_fromFront[0] = false;
-                isBuzzerSwPushedAnyCar = false;
             }
         }
 
