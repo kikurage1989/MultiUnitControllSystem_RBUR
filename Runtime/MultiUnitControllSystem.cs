@@ -297,6 +297,18 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     ReadControllerParametersFrom1e();
                     break;
                 case 7://[中][中]かつ送信方向が1e->2eで決定済
+                    if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar || transport_bool_fromFront_from1e[1];
+                        transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar || transport_bool_fromBack_from2e[1];
+                        isBuzzerSwPushedAnyCar = transport_bool_fromFront[1] || transport_bool_fromBack[1];
+                    }
+                    else
+                    {
+                        isBuzzerSwPushedAnyCar = false;
+                        transport_bool_fromFront[1] = false;
+                        transport_bool_fromBack[1] = false;
+                    }
                     ReadControllerParametersFrom1e();
                     break;
                 case 5://[後][中]
@@ -313,6 +325,18 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     ReadControllerParametersFrom2e();
                     break;
                 case 8://[中][中]かつ送信方向が2e->1eで決定済
+                    if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
+                    {
+                        transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar || transport_bool_fromFront_from2e[1];
+                        transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar || transport_bool_fromBack_from1e[1];
+                        isBuzzerSwPushedAnyCar = transport_bool_fromFront[1] || transport_bool_fromBack[1];
+                    }
+                    else
+                    {
+                        isBuzzerSwPushedAnyCar = false;
+                        transport_bool_fromFront[1] = false;
+                        transport_bool_fromBack[1] = false;
+                    }
                     ReadControllerParametersFrom2e();
                     break;
                 default:
@@ -348,7 +372,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 {
                     transport_float[0] = powerDirection;
                 }
-                
             }
 
             //Debug表示
