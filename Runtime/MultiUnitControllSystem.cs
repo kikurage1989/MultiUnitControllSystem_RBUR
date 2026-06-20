@@ -20,7 +20,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
     public class MultiUnitControllSystem : frou01.RigidBodyTrain.TrainConnectionReciever
     {
         [SerializeField, Tooltip("車両コントローラー ATS非常読み取り")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
-        [SerializeField, Tooltip("車両メッシュコントローラー ドア開閉、室内灯")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
+        [SerializeField, Tooltip("車両メッシュコントローラー ドア開閉( isOpenLeftDoor isOpenRightDoor )、室内灯( isRoomLight )")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("1エンド側Train")] protected frou01.RigidBodyTrain.Train end1Train;
         [SerializeField, Tooltip("2エンド側Train")] protected frou01.RigidBodyTrain.Train end2Train;
         [Header("1エンド側GAC")]
@@ -88,6 +88,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool[] keySw2eR = new bool[1];
 
         protected bool[] isBuzzerSw = new bool[1];
+        protected bool[] isRoomLightSw = new bool[1];
 
         [System.NonSerialized] public int[] transport_int = new int[5];
         //予約分
@@ -194,6 +195,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         //アニメーションハッシュ
         protected int isOpenLeftDoorParameterID;//isOpenLeftDoor
         protected int isOpenRightDoorParameterID;//isOpenRightDoor
+        protected int isRoomLightParameterID;//isRoomLight
 
         //開発用仮実装
         [SerializeField] protected bool debug_flg;
@@ -237,8 +239,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             isOpenLeftDoorParameterID = Animator.StringToHash("isOpenLeftDoor");
             isOpenRightDoorParameterID = Animator.StringToHash("isOpenRightDoor");
+            isRoomLightParameterID = Animator.StringToHash("isRoomLight");
 
             isBuzzerSw = buzzerSW.udonSyncedBool;
+            isRoomLightSw = roomLightSW.udonSyncedBool;
 
             isInit = true;
             //開発用仮実装
@@ -251,6 +255,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             if(!isInit) return;
             updateDeltaTime = Time.deltaTime;
             isBuzzerSwPushedAnyCar = isBuzzerSw[0];
+            isRoomLightSwPushedAnyCar = isRoomLightSw[0];
             //ハンドル位置読み取り、フロント・バックチェック
             switch(dataDirectionMode)
             {
@@ -261,12 +266,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
                     {
                         transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar;
+                        transport_bool_fromFront[2] = isRoomLightSwPushedAnyCar;
                         isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromBack_from2e[1]);
+                        isRoomLightSwPushedAnyCar = (isRoomLightSwPushedAnyCar || transport_bool_fromBack_from2e[2]);
                     }
                     else
                     {
                         isBuzzerSwPushedAnyCar = false;
                         transport_bool_fromBack[1] = false;
+                        isRoomLightSwPushedAnyCar = false;
+                        transport_bool_fromBack[2] = false;
                     }
                     ControllProcess1e();
                     break;
@@ -277,12 +286,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
                     {
                         transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar;
+                        transport_bool_fromFront[2] = isRoomLightSwPushedAnyCar;
                         isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromBack_from1e[1]);
+                        isRoomLightSwPushedAnyCar = (isRoomLightSwPushedAnyCar || transport_bool_fromBack_from1e[2]);
                     }
                     else
                     {
                         isBuzzerSwPushedAnyCar = false;
                         transport_bool_fromFront[1] = false;
+                        isRoomLightSwPushedAnyCar = false;
+                        transport_bool_fromFront[2] = false;
                     }
                     ControllProcess2e();
                     break;
@@ -290,12 +303,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
                     {
                         transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar;
+                        transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar;
                         isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromFront_from1e[1]);
+                        isRoomLightSwPushedAnyCar = (isRoomLightSwPushedAnyCar || transport_bool_fromFront_from1e[2]);
                     }
                     else
                     {
                         isBuzzerSwPushedAnyCar = false;
-                        transport_bool_fromBack[1] = false;
+                        transport_bool_fromFront[1] = false;
+                        isRoomLightSwPushedAnyCar = false;
+                        transport_bool_fromFront[2] = false;
                     }
                     ReadControllerParametersFrom1e();
                     break;
@@ -305,12 +322,19 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar || transport_bool_fromFront_from1e[1];
                         transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar || transport_bool_fromBack_from2e[1];
                         isBuzzerSwPushedAnyCar = transport_bool_fromFront[1] || transport_bool_fromBack[1];
+
+                        transport_bool_fromFront[2] = isRoomLightSwPushedAnyCar || transport_bool_fromFront_from1e[2];
+                        transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar || transport_bool_fromBack_from2e[2];
+                        isRoomLightSwPushedAnyCar = transport_bool_fromFront[2] || transport_bool_fromBack[2];
                     }
                     else
                     {
                         isBuzzerSwPushedAnyCar = false;
                         transport_bool_fromFront[1] = false;
                         transport_bool_fromBack[1] = false;
+                        isRoomLightSwPushedAnyCar = false;
+                        transport_bool_fromFront[2] = false;
+                        transport_bool_fromBack[2] = false;
                     }
                     ReadControllerParametersFrom1e();
                     break;
@@ -318,12 +342,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     if(transport_bool_fromFront[0] && transport_bool_fromBack[0])
                     {
                         transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar;
+                        transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar;
                         isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromFront_from2e[1]);
+                        isRoomLightSwPushedAnyCar = (isRoomLightSwPushedAnyCar || transport_bool_fromFront_from2e[2]);
                     }
                     else
                     {
                         isBuzzerSwPushedAnyCar = false;
                         transport_bool_fromBack[1] = false;
+                        isRoomLightSwPushedAnyCar = false;
+                        transport_bool_fromBack[2] = false;
                     }
                     ReadControllerParametersFrom2e();
                     break;
@@ -333,12 +361,19 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromFront[1] = isBuzzerSwPushedAnyCar || transport_bool_fromFront_from2e[1];
                         transport_bool_fromBack[1] = isBuzzerSwPushedAnyCar || transport_bool_fromBack_from1e[1];
                         isBuzzerSwPushedAnyCar = transport_bool_fromFront[1] || transport_bool_fromBack[1];
+
+                        transport_bool_fromFront[2] = isRoomLightSwPushedAnyCar || transport_bool_fromFront_from2e[2];
+                        transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar || transport_bool_fromBack_from1e[2];
+                        isRoomLightSwPushedAnyCar = transport_bool_fromFront[2] || transport_bool_fromBack[2];
                     }
                     else
                     {
                         isBuzzerSwPushedAnyCar = false;
                         transport_bool_fromFront[1] = false;
                         transport_bool_fromBack[1] = false;
+                        isRoomLightSwPushedAnyCar = false;
+                        transport_bool_fromFront[2] = false;
+                        transport_bool_fromBack[2] = false;
                     }
                     ReadControllerParametersFrom2e();
                     break;
@@ -355,6 +390,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 else foreach(AudioSource _buzzerSnd in buzzerSnd) _buzzerSnd.Stop();
             }
             prevIsBuzzerSwPushed = isBuzzerSwPushedAnyCar;
+            //室内灯
+            if(isRoomLightSwPushedAnyCar != prevIsRoomLightSwPushed)
+            {
+                foreach(Animator _meshAnimator in trainMeshAnimators) _meshAnimator.SetBool(isRoomLightParameterID, isRoomLightSwPushedAnyCar);
+            }
+            prevIsRoomLightSwPushed = isRoomLightSwPushedAnyCar;
 
             //力行・制動処理
             if(transport_bool_fromFront[0] && transport_bool_fromBack[0]) PowerAndBrakeProcess();
@@ -651,10 +692,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             //右扉
             if(isOpenRightDoor != prevIsOpenRightDoor)
             {
-                foreach(Animator _meshAnimator in trainMeshAnimators)
-                {
-                    _meshAnimator.SetBool(isOpenRightDoorParameterID, isOpenRightDoor);
-                }
+                foreach(Animator _meshAnimator in trainMeshAnimators) _meshAnimator.SetBool(isOpenRightDoorParameterID, isOpenRightDoor);
             }
             prevIsOpenRightDoor = isOpenRightDoor;
             _doorKeySwCol1eR.enabled = isEnableKey1eR;

@@ -413,7 +413,7 @@ MonoBehaviour:
   useTransform: 0
   SwMove: {x: 0, y: 0, z: 0}
   SwRotation: {x: 0, y: 0, z: 0}
-  useAnimator: 1
+  useAnimator: 0
   setParameterName: 
   setParameterAnimator: []
 --- !u!114 &2763543698589152355
