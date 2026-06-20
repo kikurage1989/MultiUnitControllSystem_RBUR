@@ -19,7 +19,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 {
     public class MultiUnitControllSystem : frou01.RigidBodyTrain.TrainConnectionReciever
     {
-        [SerializeField, Tooltip("車両コントローラー ブザー音出力")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
+        [SerializeField, Tooltip("車両コントローラー ATS非常読み取り")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("車両メッシュコントローラー ドア開閉、室内灯")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("1エンド側Train")] protected frou01.RigidBodyTrain.Train end1Train;
         [SerializeField, Tooltip("2エンド側Train")] protected frou01.RigidBodyTrain.Train end2Train;
@@ -54,6 +54,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected AudioSource[] buzzerSnd;
         protected bool isBuzzerSwPushedAnyCar;
         protected bool prevIsBuzzerSwPushed;
+        [Header("室内灯Sw")]
+        [SerializeField] protected syncSW_Base roomLightSW;
+        protected bool isRoomLightSwPushedAnyCar;
+        protected bool prevIsRoomLightSwPushed;
 
         protected int[] notchSegment1e = new int[1];
         protected float[] notchPosition1e = new float[1];

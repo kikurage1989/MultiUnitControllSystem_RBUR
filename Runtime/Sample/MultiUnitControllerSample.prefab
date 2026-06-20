@@ -336,6 +336,7 @@ MonoBehaviour:
   buzzerSnd:
   - {fileID: 7337126101845105390}
   - {fileID: 6776325002475571230}
+  roomLightSW: {fileID: 1833571894862552739}
   notchSegmentLocal: 0
   brakeSegmentLocal: 0
   brakePositionLocal: 0
@@ -2268,6 +2269,10 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 5470566190642627562, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+    - target: {fileID: 6169213440951507536, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 6169213440951507536, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
     - target: {fileID: 6253131514037565122, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
       propertyPath: eventReceiverMUCS
       value: 
@@ -2395,6 +2400,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 079492f170d6b3f45a2b5cfdf1d5907a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1833571894862552739 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6169213440951507536, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+  m_PrefabInstance: {fileID: 5543743246071940339}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93c1216465b81e840868e2723d08f5c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &1884968544439153201 stripped
