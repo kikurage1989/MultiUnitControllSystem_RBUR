@@ -101,7 +101,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         // 0　信号方向：　false 1e->2e　True　2e->1e　方向性
         // 1　進行方向決定済：Trueで決定済。運転台とか後端とかはこれで決定
         // 2　EnablePermission　エンジン始動とかパン上げとか
-        // 3　ATS_EmerStop
 
         [System.NonSerialized] public bool[] transport_bool_Doors = new bool[8];
         //ドア専用(方向性があるため)　前後送信し、「いずれかの車両で」という条件を検知するもの
