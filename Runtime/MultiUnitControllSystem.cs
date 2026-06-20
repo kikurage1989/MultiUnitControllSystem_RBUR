@@ -19,10 +19,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 {
     public class MultiUnitControllSystem : frou01.RigidBodyTrain.TrainConnectionReciever
     {
-        [SerializeField, Tooltip("車両コントローラー ATS非常読み取り")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
+        [SerializeField, Tooltip("車両コントローラー ATS非常読み取り 1エンド側、2エンド側車両のみ 単車は1個のみ")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("車両メッシュコントローラー ドア開閉( isOpenLeftDoor isOpenRightDoor )、室内灯( isRoomLight )")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("1エンド側Train")] protected frou01.RigidBodyTrain.Train end1Train;
-        [SerializeField, Tooltip("2エンド側Train")] protected frou01.RigidBodyTrain.Train end2Train;
+        [SerializeField, Tooltip("2エンド側Train 単車の場合は同じ車両を指定")] protected frou01.RigidBodyTrain.Train end2Train;
         [Header("1エンド側GAC")]
         [SerializeField] protected Controller_Base notchLever1e;
         [SerializeField] protected Controller_Base brakeLever1e;
@@ -90,12 +90,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool[] isBuzzerSw = new bool[1];
         protected bool[] isRoomLightSw = new bool[1];
 
-        [System.NonSerialized] public int[] transport_int = new int[5];
+        [System.NonSerialized] public int[] transport_int = new int[2];
         //予約分
         // 0　notchPos　ATSなどの処理済みの値　セグメント
         // 1　brakeSeg　ブレーキハンドルセグメント
 
-        [System.NonSerialized] public float[] transport_float = new float[8];
+        [System.NonSerialized] public float[] transport_float = new float[3];
         //予約分
         // 0　powerDirection　1エンド方向を1f、中立で0f、2エンド方向で-1f　方向性
         // 1　brakePosition　ブレーキハンドルポジション
@@ -106,6 +106,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         // 0　信号方向：　false 1e->2e　True　2e->1e　方向性
         // 1　進行方向決定済：Trueで決定済。運転台とか後端とかはこれで決定
         // 2　EnablePermission　エンジン始動とかパン上げとか
+        protected bool EnablePermission;
 
         [System.NonSerialized] public bool[] transport_bool_Doors = new bool[8];
         //ドア専用(方向性があるため)　前後送信し、「いずれかの車両で」という条件を検知するもの
@@ -134,16 +135,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         // 3  1e側の隣車へBackを渡せる
         // 4  2e側の隣車へBackを渡せる
 
-        protected int[] transport_int_from1e = new int[5];
-        protected float[] transport_float_from1e = new float[8];
+        protected int[] transport_int_from1e = new int[2];
+        protected float[] transport_float_from1e = new float[3];
         protected bool[] transport_bool_from1e = new bool[8];
         protected bool[] transport_bool_fromFront_from1e = new bool[6];
         protected bool[] transport_bool_fromBack_from1e = new bool[6];
         protected int[] zengoSwSegment_from1e = new int[1];
         protected bool[] transport_bool_Doors_from1e = new bool[8];
 
-        protected int[] transport_int_from2e = new int[5];
-        protected float[] transport_float_from2e = new float[8];
+        protected int[] transport_int_from2e = new int[2];
+        protected float[] transport_float_from2e = new float[3];
         protected bool[] transport_bool_from2e = new bool[8];
         protected bool[] transport_bool_fromFront_from2e = new bool[6];
         protected bool[] transport_bool_fromBack_from2e = new bool[6];
@@ -276,6 +277,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromBack[1] = false;
                         isRoomLightSwPushedAnyCar = false;
                         transport_bool_fromBack[2] = false;
+                        EnablePermission = false;
                     }
                     ControllProcess1e();
                     break;
@@ -296,6 +298,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromFront[1] = false;
                         isRoomLightSwPushedAnyCar = false;
                         transport_bool_fromFront[2] = false;
+                        EnablePermission = false;
                     }
                     ControllProcess2e();
                     break;
@@ -306,6 +309,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar;
                         isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromFront_from1e[1]);
                         isRoomLightSwPushedAnyCar = (isRoomLightSwPushedAnyCar || transport_bool_fromFront_from1e[2]);
+
+                        EnablePermission = transport_bool_from1e[2];
+                        Receive_transport_bool_Others(false);
                     }
                     else
                     {
@@ -313,6 +319,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromFront[1] = false;
                         isRoomLightSwPushedAnyCar = false;
                         transport_bool_fromFront[2] = false;
+                        EnablePermission = false;
+                        Reset_transport_bool_Others();
                     }
                     ReadControllerParametersFrom1e();
                     break;
@@ -326,6 +334,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromFront[2] = isRoomLightSwPushedAnyCar || transport_bool_fromFront_from1e[2];
                         transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar || transport_bool_fromBack_from2e[2];
                         isRoomLightSwPushedAnyCar = transport_bool_fromFront[2] || transport_bool_fromBack[2];
+                        
+                        EnablePermission = transport_bool_from1e[2];
+                        Receive_transport_bool_Others(false);
                     }
                     else
                     {
@@ -335,6 +346,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         isRoomLightSwPushedAnyCar = false;
                         transport_bool_fromFront[2] = false;
                         transport_bool_fromBack[2] = false;
+                        EnablePermission = false;
+                        Reset_transport_bool_Others();
                     }
                     ReadControllerParametersFrom1e();
                     break;
@@ -345,6 +358,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar;
                         isBuzzerSwPushedAnyCar = (isBuzzerSwPushedAnyCar || transport_bool_fromFront_from2e[1]);
                         isRoomLightSwPushedAnyCar = (isRoomLightSwPushedAnyCar || transport_bool_fromFront_from2e[2]);
+                        EnablePermission = transport_bool_from2e[2];
+                        Receive_transport_bool_Others(true);
                     }
                     else
                     {
@@ -352,6 +367,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromBack[1] = false;
                         isRoomLightSwPushedAnyCar = false;
                         transport_bool_fromBack[2] = false;
+                        EnablePermission = false;
+                        Reset_transport_bool_Others();
                     }
                     ReadControllerParametersFrom2e();
                     break;
@@ -365,6 +382,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         transport_bool_fromFront[2] = isRoomLightSwPushedAnyCar || transport_bool_fromFront_from2e[2];
                         transport_bool_fromBack[2] = isRoomLightSwPushedAnyCar || transport_bool_fromBack_from1e[2];
                         isRoomLightSwPushedAnyCar = transport_bool_fromFront[2] || transport_bool_fromBack[2];
+
+                        EnablePermission = transport_bool_from2e[2];
+                        Receive_transport_bool_Others(true);
                     }
                     else
                     {
@@ -374,6 +394,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                         isRoomLightSwPushedAnyCar = false;
                         transport_bool_fromFront[2] = false;
                         transport_bool_fromBack[2] = false;
+                        EnablePermission = false;
+                        Reset_transport_bool_Others();
                     }
                     ReadControllerParametersFrom2e();
                     break;
@@ -381,6 +403,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     if(isBuzzerSwPushedAnyCar) isBuzzerSwPushedAnyCar = false;
                     if(transport_bool_fromFront[1]) transport_bool_fromFront[1] = false;
                     if(transport_bool_fromBack[1]) transport_bool_fromBack[1] = false;
+                    if(EnablePermission || transport_bool[2]) EnablePermission = transport_bool[2] = false;
                     break;
             }
             //ブザー音
@@ -416,6 +439,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 {
                     transport_float[0] = powerDirection;
                 }
+                transport_bool[2] = EnablePermission;
+                Send_transport_bool_Others();
             }
 
             //Debug表示
@@ -437,8 +462,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 dis_text += "powerDirection: " + powerDirection + "\n";
                 dis_text += "FrontCheck: " + transport_bool_fromFront[0] + "\n";
                 dis_text += "BackCheck: " + transport_bool_fromBack[0] + "\n";
-                // dis_text += String.Format("oil:{0:000.00}", convertorOilTemperature) + "\n";
-                // dis_text += String.Format("EC_Mcal:{0:000.00}", engineChargeKcal / 1000f) + "\n";
+                dis_text += "EnablePermission: " + EnablePermission + "\n";
                 debugText.text = dis_text;
             }
         }
@@ -511,6 +535,45 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             {
                 transport_bool_fromFront[0] = false;
             }
+        }
+        //MARK:他transport_bool処理
+        //他transport_bool送信 運転台->後端方向のみ
+        protected virtual void Send_transport_bool_Others()
+        {
+            // transport_bool[3] = OtherParameter1;
+            // transport_bool[4] = OtherParameter2;
+            // transport_bool[5] = OtherParameter3;
+            // transport_bool[6] = OtherParameter4;
+            // transport_bool[7] = OtherParameter5;
+        }
+        //他transport_bool受信 運転台->後端方向のみ
+        protected virtual void Receive_transport_bool_Others(bool readFrom2e)
+        {
+            // if(!readFrom2e)//1eから読み込み
+            // {
+            //     // OtherParameter1 = transport_bool_from1e[3];
+            //     // OtherParameter2 = transport_bool_from1e[4];
+            //     // OtherParameter3 = transport_bool_from1e[5];
+            //     // OtherParameter4 = transport_bool_from1e[6];
+            //     // OtherParameter5 = transport_bool_from1e[7];
+            // }
+            // else
+            // {
+            //     // OtherParameter1 = transport_bool_from2e[3];
+            //     // OtherParameter2 = transport_bool_from2e[4];
+            //     // OtherParameter3 = transport_bool_from2e[5];
+            //     // OtherParameter4 = transport_bool_from2e[6];
+            //     // OtherParameter5 = transport_bool_from2e[7];
+            // }
+        }
+        //他transport_bool変数リセット
+        protected virtual void Reset_transport_bool_Others()
+        {
+            // OtherParameter1 = false;
+            // OtherParameter2 = false;
+            // OtherParameter3 = false;
+            // OtherParameter4 = false;
+            // OtherParameter5 = false;
         }
 
         //ドア状態更新
