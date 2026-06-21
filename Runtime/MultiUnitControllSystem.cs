@@ -106,7 +106,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         // 0　信号方向：　false 1e->2e　True　2e->1e　方向性
         // 1　進行方向決定済：Trueで決定済。運転台とか後端とかはこれで決定
         // 2　EnablePermission　エンジン始動とかパン上げとか
-        protected bool EnablePermission;
+        [SerializeField] protected bool EnablePermission;
 
         [System.NonSerialized] public bool[] transport_bool_Doors = new bool[8];
         //ドア専用(方向性があるため)　前後送信し、「いずれかの車両で」という条件を検知するもの
@@ -203,6 +203,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected frou01.RigidBodyTrain.MortorAndWheel _MotorAndWheel;
         protected float[] outputMortorForce = new float[1];
         protected float[] outputBrakeForce = new float[1];
+        [SerializeField] protected bool OtherParameter1;
 
         protected virtual void Start()
         {
@@ -463,6 +464,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 dis_text += "FrontCheck: " + transport_bool_fromFront[0] + "\n";
                 dis_text += "BackCheck: " + transport_bool_fromBack[0] + "\n";
                 dis_text += "EnablePermission: " + EnablePermission + "\n";
+                dis_text += "OtherParameter1: " + OtherParameter1 + "\n";
                 debugText.text = dis_text;
             }
         }
@@ -540,7 +542,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         //他transport_bool送信 運転台->後端方向のみ
         protected virtual void Send_transport_bool_Others()
         {
-            // transport_bool[3] = OtherParameter1;
+            transport_bool[3] = OtherParameter1;
             // transport_bool[4] = OtherParameter2;
             // transport_bool[5] = OtherParameter3;
             // transport_bool[6] = OtherParameter4;
@@ -549,22 +551,22 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         //他transport_bool受信 運転台->後端方向のみ
         protected virtual void Receive_transport_bool_Others(bool readFrom2e)
         {
-            // if(!readFrom2e)//1eから読み込み
-            // {
-            //     // OtherParameter1 = transport_bool_from1e[3];
-            //     // OtherParameter2 = transport_bool_from1e[4];
-            //     // OtherParameter3 = transport_bool_from1e[5];
-            //     // OtherParameter4 = transport_bool_from1e[6];
-            //     // OtherParameter5 = transport_bool_from1e[7];
-            // }
-            // else
-            // {
-            //     // OtherParameter1 = transport_bool_from2e[3];
-            //     // OtherParameter2 = transport_bool_from2e[4];
-            //     // OtherParameter3 = transport_bool_from2e[5];
-            //     // OtherParameter4 = transport_bool_from2e[6];
-            //     // OtherParameter5 = transport_bool_from2e[7];
-            // }
+            if(!readFrom2e)//1eから読み込み
+            {
+                OtherParameter1 = transport_bool_from1e[3];
+                // OtherParameter2 = transport_bool_from1e[4];
+                // OtherParameter3 = transport_bool_from1e[5];
+                // OtherParameter4 = transport_bool_from1e[6];
+                // OtherParameter5 = transport_bool_from1e[7];
+            }
+            else
+            {
+                OtherParameter1 = transport_bool_from2e[3];
+                // OtherParameter2 = transport_bool_from2e[4];
+                // OtherParameter3 = transport_bool_from2e[5];
+                // OtherParameter4 = transport_bool_from2e[6];
+                // OtherParameter5 = transport_bool_from2e[7];
+            }
         }
         //他transport_bool変数リセット
         protected virtual void Reset_transport_bool_Others()
