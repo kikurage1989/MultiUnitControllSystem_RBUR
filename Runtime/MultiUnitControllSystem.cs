@@ -199,6 +199,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected int isRoomLightParameterID;//isRoomLight
 
         //開発用仮実装
+        [Header("起動Sw　パンタグラフ等")]
+        [SerializeField] protected syncSW_Base powerEnableSW;
+        protected bool[] isPowerEnableSw = new bool[1];
+
         [SerializeField] protected bool debug_flg;
         [SerializeField] protected frou01.RigidBodyTrain.MortorAndWheel _MotorAndWheel;
         protected float[] outputMortorForce = new float[1];
@@ -247,6 +251,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             isInit = true;
             //開発用仮実装
+            isPowerEnableSw = powerEnableSW.udonSyncedBool;
             outputMortorForce = _MotorAndWheel.MortorForce;
             outputBrakeForce = _MotorAndWheel.BrakeForce;
         }
@@ -257,6 +262,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             updateDeltaTime = Time.deltaTime;
             isBuzzerSwPushedAnyCar = isBuzzerSw[0];
             isRoomLightSwPushedAnyCar = isRoomLightSw[0];
+            SwReadProcess();
+
             //ハンドル位置読み取り、フロント・バックチェック
             switch(dataDirectionMode)
             {
@@ -466,6 +473,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 debugText.text = dis_text;
             }
         }
+        protected virtual void SwReadProcess() //スイッチ状態読み取り
+        {
+            EnablePermission = isPowerEnableSw[0];
+        }
 
         protected virtual void DecideNotchAndBrakePos() //速度制限やATS等の非常制動など　base.DecideNotchAndBrakePos()
         {
@@ -540,40 +551,40 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         //他transport_bool送信 運転台->後端方向のみ
         protected virtual void Send_transport_bool_Others()
         {
-            // transport_bool[3] = OtherParameter1;
-            // transport_bool[4] = OtherParameter2;
-            // transport_bool[5] = OtherParameter3;
-            // transport_bool[6] = OtherParameter4;
-            // transport_bool[7] = OtherParameter5;
+            // transport_bool[3] = OtherBoolParameter1;
+            // transport_bool[4] = OtherBoolParameter2;
+            // transport_bool[5] = OtherBoolParameter3;
+            // transport_bool[6] = OtherBoolParameter4;
+            // transport_bool[7] = OtherBoolParameter5;
         }
         //他transport_bool受信 運転台->後端方向のみ
         protected virtual void Receive_transport_bool_Others(bool readFrom2e)
         {
             // if(!readFrom2e)//1eから読み込み
             // {
-            //     // OtherParameter1 = transport_bool_from1e[3];
-            //     // OtherParameter2 = transport_bool_from1e[4];
-            //     // OtherParameter3 = transport_bool_from1e[5];
-            //     // OtherParameter4 = transport_bool_from1e[6];
-            //     // OtherParameter5 = transport_bool_from1e[7];
+            //     // OtherBoolParameter1 = transport_bool_from1e[3];
+            //     // OtherBoolParameter2 = transport_bool_from1e[4];
+            //     // OtherBoolParameter3 = transport_bool_from1e[5];
+            //     // OtherBoolParameter4 = transport_bool_from1e[6];
+            //     // OtherBoolParameter5 = transport_bool_from1e[7];
             // }
             // else
             // {
-            //     // OtherParameter1 = transport_bool_from2e[3];
-            //     // OtherParameter2 = transport_bool_from2e[4];
-            //     // OtherParameter3 = transport_bool_from2e[5];
-            //     // OtherParameter4 = transport_bool_from2e[6];
-            //     // OtherParameter5 = transport_bool_from2e[7];
+            //     // OtherBoolParameter1 = transport_bool_from2e[3];
+            //     // OtherBoolParameter2 = transport_bool_from2e[4];
+            //     // OtherBoolParameter3 = transport_bool_from2e[5];
+            //     // OtherBoolParameter4 = transport_bool_from2e[6];
+            //     // OtherBoolParameter5 = transport_bool_from2e[7];
             // }
         }
         //他transport_bool変数リセット
         protected virtual void Reset_transport_bool_Others()
         {
-            // OtherParameter1 = false;
-            // OtherParameter2 = false;
-            // OtherParameter3 = false;
-            // OtherParameter4 = false;
-            // OtherParameter5 = false;
+            // OtherBoolParameter1 = false;
+            // OtherBoolParameter2 = false;
+            // OtherBoolParameter3 = false;
+            // OtherBoolParameter4 = false;
+            // OtherBoolParameter5 = false;
         }
 
         //ドア状態更新

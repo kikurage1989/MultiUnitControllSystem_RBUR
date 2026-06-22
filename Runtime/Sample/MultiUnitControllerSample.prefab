@@ -337,6 +337,8 @@ MonoBehaviour:
   - {fileID: 7337126101845105390}
   - {fileID: 6776325002475571230}
   roomLightSW: {fileID: 1833571894862552739}
+  powerEnableSW: {fileID: 73091271237472523}
+  EnablePermission: 0
   notchSegmentLocal: 0
   brakeSegmentLocal: 0
   brakePositionLocal: 0
@@ -2269,6 +2271,10 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 5470566190642627562, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+    - target: {fileID: 5615136628958582264, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 5615136628958582264, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
     - target: {fileID: 6169213440951507536, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -2377,6 +2383,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sw1eAsm
       objectReference: {fileID: 0}
+    - target: {fileID: 9130485980065852528, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 9130485980065852528, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2391,6 +2401,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4966498907875191829}
   m_SourcePrefab: {fileID: 100100000, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+--- !u!114 &73091271237472523 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5615136628958582264, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}
+  m_PrefabInstance: {fileID: 5543743246071940339}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93c1216465b81e840868e2723d08f5c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1562896904225145616 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6440098436077520867, guid: 6f614170c9c60ec4bb1e41033ebdddeb, type: 3}

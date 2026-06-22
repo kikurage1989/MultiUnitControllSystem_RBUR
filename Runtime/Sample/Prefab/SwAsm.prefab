@@ -45,6 +45,14 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 20525602948598813, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+    - target: {fileID: 455337854624425197, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: parentSW
+      value: 
+      objectReference: {fileID: 5615136628958582264}
+    - target: {fileID: 455337854624425197, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 455337854624425197, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
     - target: {fileID: 2393006179848292184, guid: 029f601a1a3dc244fbbdd0435bde1885, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -187,6 +195,10 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 2727873754792101409, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - target: {fileID: 2774707414099176115, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 2774707414099176115, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
     - target: {fileID: 3045308737440970496, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -195,6 +207,10 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 3498266393486596436, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+    - target: {fileID: 4535184485618066715, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4535184485618066715, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
     - target: {fileID: 6807584841354685792, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -208,6 +224,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+--- !u!114 &5615136628958582264 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4535184485618066715, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
+  m_PrefabInstance: {fileID: 8294732493508899043}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93c1216465b81e840868e2723d08f5c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &8313025796573252424 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 18299908793875371, guid: afdf6d9dcd7d5e44b95ea97fbf3abb7a, type: 3}
