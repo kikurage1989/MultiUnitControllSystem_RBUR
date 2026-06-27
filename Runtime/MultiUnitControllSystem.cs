@@ -58,6 +58,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField] protected syncSW_Base roomLightSW;
         protected bool isRoomLightSwPushedAnyCar;
         protected bool prevIsRoomLightSwPushed;
+        [Header("ATS_Reciever コライダー")]
+        [SerializeField] protected Collider atsReceiver1e;
+        [SerializeField] protected Collider atsReceiver2e;
 
         protected int[] notchSegment1e = new int[1];
         protected float[] notchPosition1e = new float[1];
@@ -967,6 +970,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             if((sw1 == 2 && sw2 == 2) || (sw1 == 0 && sw2 == 0))
             {
                 dataDirectionMode = 9;
+
+                atsReceiver1e.enabled = false;
+                atsReceiver2e.enabled = false;
             }
             // [前][後]
             else if(sw1 == 2 && sw2 == 0)
@@ -976,6 +982,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_bool[1] = true;
                 transport_bool_fromFront[0] = true;
                 transport_bool_fromBack[0] = true;
+
+                atsReceiver1e.enabled = true;
+                atsReceiver2e.enabled = false;
             }
             // [後][前]
             else if(sw1 == 0 && sw2 == 2)
@@ -985,6 +994,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_bool[1] = true;
                 transport_bool_fromFront[0] = true;
                 transport_bool_fromBack[0] = true;
+
+                atsReceiver1e.enabled = false;
+                atsReceiver2e.enabled = true;
             }
             // [前][中]
             else if(sw1 == 2 && sw2 == 1)
@@ -1001,6 +1013,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
                 // 2e側からBackが来ていれば、編成としてBack成立
                 transport_bool_fromBack[0] = backFrom2e;
+
+                atsReceiver1e.enabled = true;
+                atsReceiver2e.enabled = false;
             }
             // [中][前]
             else if(sw1 == 1 && sw2 == 2)
@@ -1016,6 +1031,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_bool_fromFront[3] = true;
 
                 transport_bool_fromBack[0] = backFrom1e;
+
+                atsReceiver1e.enabled = false;
+                atsReceiver2e.enabled = true;
             }
             // [中][後]
             else if(sw1 == 1 && sw2 == 0)
@@ -1029,6 +1047,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
                 // 1e側へBackを返せる
                 transport_bool_fromBack[3] = true;
+
+                atsReceiver1e.enabled = false;
+                atsReceiver2e.enabled = false;
             }
             // [後][中]
             else if(sw1 == 0 && sw2 == 1)
@@ -1042,6 +1063,9 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
                 // 2e側へBackを返せる
                 transport_bool_fromBack[4] = true;
+
+                atsReceiver1e.enabled = false;
+                atsReceiver2e.enabled = false;
             }
             // [中][中]
             else if(sw1 == 1 && sw2 == 1)
@@ -1096,6 +1120,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     dataDirectionMode = 6;
                     transport_bool[1] = false;
                 }
+                atsReceiver1e.enabled = false;
+                atsReceiver2e.enabled = false;
             }
 
             return oldMode != dataDirectionMode
