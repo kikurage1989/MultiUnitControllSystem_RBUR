@@ -25,14 +25,30 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [SerializeField, Tooltip("2エンド側Train 単車の場合は同じ車両を指定")] protected frou01.RigidBodyTrain.Train end2Train;
         [Header("1エンド側GAC")]
         [SerializeField] protected Controller_Base notchLever1e;
+        protected Collider notchLeverColider1e;
         [SerializeField] protected Controller_Base brakeLever1e;
+        protected GameObject brakeHandleMesh1e;
+        protected Collider brakeLeverColider1e;
         [SerializeField] protected Controller_Base reverser1e;
+        protected Collider reverserColider1e;
         [SerializeField] protected Controller_Base zengoSW1e;
+        protected Collider zengoSWColider1e;
+        [SerializeField] protected EndChangeSW EndChangeSW1e;
+        protected Collider EndChangeSWColider1e;
+        protected bool[] UseEnd1 = new bool[1];
         [Header("2エンド側GAC")]
         [SerializeField] protected Controller_Base notchLever2e;
+        protected Collider notchLeverColider2e;
         [SerializeField] protected Controller_Base brakeLever2e;
+        protected GameObject brakeHandleMesh2e;
+        protected Collider brakeLeverColider2e;
         [SerializeField] protected Controller_Base reverser2e;
+        protected Collider reverserColider2e;
         [SerializeField] protected Controller_Base zengoSW2e;
+        protected Collider zengoSWColider2e;
+        [SerializeField] protected EndChangeSW EndChangeSW2e;
+        protected Collider EndChangeSWColider2e;
+        protected bool[] UseEnd2 = new bool[1];
         [Header("左側（1エンド方向基準）ドアSw")]
         [SerializeField] protected SyncDoorSW _doorSwLeft1e;
         [SerializeField] protected SyncDoorSW _doorSwLeft2e;
@@ -213,20 +229,42 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
         protected virtual void Start()
         {
+            has2Handle = Utilities.IsValid(brakeLever1e) && Utilities.IsValid(brakeLever2e);
+            if(has2Handle)
+            {
+                brakeSegment1e = brakeLever1e.currentSegment_Exposed;
+                brakePosition1e = brakeLever1e.controllerPosition_Exposed;
+                brakeNormPosition1e = brakeLever1e.currentNormalizePosition_Exposed;
+                brakeLeverColider1e = brakeLever1e.GetComponent<Collider>();
+                brakeSegment2e = brakeLever2e.currentSegment_Exposed;
+                brakePosition2e = brakeLever2e.controllerPosition_Exposed;
+                brakeNormPosition2e = brakeLever2e.currentNormalizePosition_Exposed;
+                brakeLeverColider2e = brakeLever2e.GetComponent<Collider>();
+            }
+
             isOwnerState = Networking.IsOwner(this.gameObject);
             notchSegment1e = notchLever1e.currentSegment_Exposed;
-            brakeSegment1e = brakeLever1e.currentSegment_Exposed;
-            brakePosition1e = brakeLever1e.controllerPosition_Exposed;
-            brakeNormPosition1e = brakeLever1e.currentNormalizePosition_Exposed;
             reverserSegment1e = reverser1e.currentSegment_Exposed;
             zengoSwSegment1e = zengoSW1e.currentSegment_Exposed;
+            zengoSWColider1e = zengoSW1e.GetComponent<Collider>();
+            UseEnd1 = EndChangeSW1e.udonSyncedBool;
+            EndChangeSWColider1e = EndChangeSW1e.GetComponent<Collider>();
+            notchLeverColider1e = notchLever1e.GetComponent<Collider>();
+            reverserColider1e = reverser1e.GetComponent<Collider>();
 
             notchSegment2e = notchLever2e.currentSegment_Exposed;
-            brakeSegment2e = brakeLever2e.currentSegment_Exposed;
-            brakePosition2e = brakeLever2e.controllerPosition_Exposed;
-            brakeNormPosition2e = brakeLever2e.currentNormalizePosition_Exposed;
             reverserSegment2e = reverser2e.currentSegment_Exposed;
             zengoSwSegment2e = zengoSW2e.currentSegment_Exposed;
+            zengoSWColider2e = zengoSW2e.GetComponent<Collider>();
+            UseEnd2 = EndChangeSW2e.udonSyncedBool;
+            EndChangeSWColider2e = EndChangeSW2e.GetComponent<Collider>();
+            notchLeverColider2e = notchLever2e.GetComponent<Collider>();
+            reverserColider2e = reverser2e.GetComponent<Collider>();
+
+            Transform tmpTransform = brakeLever1e.transform.parent.Find("BrakeHandleMesh");
+            if(tmpTransform != null) brakeHandleMesh1e = tmpTransform.gameObject;
+            tmpTransform = brakeLever2e.transform.parent.Find("BrakeHandleMesh");
+            if(tmpTransform != null) brakeHandleMesh2e = tmpTransform.gameObject;
 
             doorSwLeft1e = _doorSwLeft1e.udonSyncedBool;
             doorSwLeft2e = _doorSwLeft2e.udonSyncedBool;
@@ -242,8 +280,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             _doorKeySwCol2eL = _keySw2eL.GetComponent<Collider>();
             _doorKeySwCol1eR = _keySw1eR.GetComponent<Collider>();
             _doorKeySwCol2eR = _keySw2eR.GetComponent<Collider>();
-
-            has2Handle = Utilities.IsValid(brakeLever1e) && Utilities.IsValid(brakeLever2e);
 
             isOpenLeftDoorParameterID = Animator.StringToHash("isOpenLeftDoor");
             isOpenRightDoorParameterID = Animator.StringToHash("isOpenRightDoor");
@@ -454,6 +490,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             }
 
             //Debug表示
+
             if(Utilities.IsValid(debugText))
             {
                 string dis_text = "";
@@ -1188,6 +1225,28 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         public override void OnOwnershipTransferred(VRC.SDKBase.VRCPlayerApi player)
         {
             isOwnerState = player == Networking.LocalPlayer;
+        }
+
+        //MARK:エンド交換 運転台インターロック
+        public void UpdateControllerEnable()
+        {
+            // Debug.Log("UpdateControllerEnable");
+            SendCustomEventDelayedFrames(nameof(UpdateControllerEnableProcess), 1);
+        }
+        public void UpdateControllerEnableProcess()
+        {
+            notchLeverColider1e.enabled = brakeLeverColider1e.enabled = UseEnd1[0];
+            notchLeverColider2e.enabled = brakeLeverColider2e.enabled = UseEnd2[0];
+            brakeHandleMesh1e.SetActive(UseEnd1[0]);
+            zengoSWColider1e.enabled = !UseEnd1[0];
+            brakeHandleMesh2e.SetActive(UseEnd2[0]);
+            zengoSWColider2e.enabled = !UseEnd2[0];
+            
+            reverserColider1e.enabled = UseEnd1[0] && (notchSegment1e[0] == 0);
+            reverserColider2e.enabled = UseEnd2[0] && (notchSegment2e[0] == 0);
+
+            EndChangeSWColider1e.enabled = !UseEnd2[0];
+            EndChangeSWColider2e.enabled = !UseEnd1[0];
         }
     }
 }
