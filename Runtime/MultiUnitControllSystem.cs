@@ -19,10 +19,12 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 {
     public class MultiUnitControllSystem : frou01.RigidBodyTrain.TrainConnectionReciever
     {
-        [SerializeField, Tooltip("車両コントローラー ATS非常読み取り 1エンド側、2エンド側車両のみ 単車は1個のみ")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
+        // [SerializeField, Tooltip("車両コントローラー ATS非常読み取り 1エンド側、2エンド側車両のみ 単車は1個のみ")] protected Animator[] controllerAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("車両メッシュコントローラー ドア開閉( isOpenLeftDoor isOpenRightDoor )、室内灯( isRoomLight )")] protected Animator[] trainMeshAnimators;//車体メッシュアニメーションコントローラ ドア開閉
         [SerializeField, Tooltip("1エンド側Train")] protected frou01.RigidBodyTrain.Train end1Train;
         [SerializeField, Tooltip("2エンド側Train 単車の場合は同じ車両を指定")] protected frou01.RigidBodyTrain.Train end2Train;
+        [SerializeField, Tooltip("ノッチ切セグメント")] protected int notchOffSegment = 0;
+        [SerializeField, Tooltip("ブレーキハンドル抜取セグメント")] protected int brakeHandleNukitoriSegment = 2;
         [Header("1エンド側GAC")]
         [SerializeField] protected Controller_Base notchLever1e;
         protected Collider notchLeverColider1e;
@@ -919,6 +921,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         [NetworkCallable]
         public void DirectionRecalcTick()
         {
+            UpdateControllerEnableProcess();
             directionRecalcQueued = false;
 
             if(isConnectedOtherCar[0])
@@ -1235,18 +1238,26 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         public void UpdateControllerEnableProcess()
         {
-            notchLeverColider1e.enabled = brakeLeverColider1e.enabled = UseEnd1[0];
-            notchLeverColider2e.enabled = brakeLeverColider2e.enabled = UseEnd2[0];
-            brakeHandleMesh1e.SetActive(UseEnd1[0]);
+            notchLeverColider1e.enabled = UseEnd1[0];
+            notchLeverColider2e.enabled = UseEnd2[0];
             zengoSWColider1e.enabled = !UseEnd1[0];
-            brakeHandleMesh2e.SetActive(UseEnd2[0]);
             zengoSWColider2e.enabled = !UseEnd2[0];
-            
-            reverserColider1e.enabled = UseEnd1[0] && (notchSegment1e[0] == 0);
-            reverserColider2e.enabled = UseEnd2[0] && (notchSegment2e[0] == 0);
-
-            EndChangeSWColider1e.enabled = !UseEnd2[0];
-            EndChangeSWColider2e.enabled = !UseEnd1[0];
+            if(has2Handle)
+            {
+                brakeLeverColider1e.enabled = UseEnd1[0];
+                brakeLeverColider2e.enabled = UseEnd2[0];
+                brakeHandleMesh1e.SetActive(UseEnd1[0]);
+                brakeHandleMesh2e.SetActive(UseEnd2[0]);
+                EndChangeSWColider1e.enabled = (!UseEnd1[0] && !UseEnd2[0] && (zengoSwSegment1e[0] == 2)) || (UseEnd1[0] && (notchSegment1e[0] == notchOffSegment) && (reverserSegment1e[0] == 1) && (brakeSegment1e[0] == brakeHandleNukitoriSegment));
+                EndChangeSWColider2e.enabled = (!UseEnd1[0] && !UseEnd2[0] && (zengoSwSegment2e[0] == 2)) || (UseEnd2[0] && (notchSegment2e[0] == notchOffSegment) && (reverserSegment2e[0] == 1) && (brakeSegment2e[0] == brakeHandleNukitoriSegment));
+            }
+            else
+            {
+                EndChangeSWColider1e.enabled = (!UseEnd1[0] && !UseEnd2[0] && (zengoSwSegment1e[0] == 2)) || (UseEnd1[0] && (notchSegment1e[0] == notchOffSegment) && (reverserSegment1e[0] == 1));
+                EndChangeSWColider2e.enabled = (!UseEnd1[0] && !UseEnd2[0] && (zengoSwSegment2e[0] == 2)) || (UseEnd2[0] && (notchSegment2e[0] == notchOffSegment) && (reverserSegment2e[0] == 1));
+            }
+            reverserColider1e.enabled = UseEnd1[0] && (notchSegment1e[0] == notchOffSegment);
+            reverserColider2e.enabled = UseEnd2[0] && (notchSegment2e[0] == notchOffSegment);
         }
     }
 }

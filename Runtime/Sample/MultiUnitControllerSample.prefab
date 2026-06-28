@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8372782051537283962}
   - component: {fileID: 7387786355108546620}
   m_Layer: 0
-  m_Name: endChangeSw1e
+  m_Name: EndChangeSw1e
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -684,11 +684,12 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 4919783757988625803}
   connectionTags:
   - SampleConnection
-  controllerAnimators: []
   trainMeshAnimators:
   - {fileID: 379474491148725125}
   end1Train: {fileID: 5586038024139767847}
   end2Train: {fileID: 5586038024139767847}
+  notchOffSegment: 0
+  brakeHandleNukitoriSegment: 2
   notchLever1e: {fileID: 5601419716073569304}
   brakeLever1e: {fileID: 527470595669329888}
   reverser1e: {fileID: 5622418083740423383}
@@ -934,7 +935,7 @@ GameObject:
   - component: {fileID: 6388551826509589725}
   - component: {fileID: 1988101233891292207}
   m_Layer: 0
-  m_Name: endChangeSw2e
+  m_Name: EndChangeSw2e
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -980,7 +981,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 0.1, y: 0.1, z: 0.1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -2293,6 +2294,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Brake
       objectReference: {fileID: 0}
+    - target: {fileID: 3352792250484556728, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.57357645
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352792250484556728, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.81915206
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352792250484556728, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 110
+      objectReference: {fileID: 0}
     - target: {fileID: 3352792251350899714, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
       propertyPath: m_Radius
       value: 0.03
@@ -2324,6 +2337,14 @@ PrefabInstance:
     - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
       propertyPath: UseAnimator
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: currentSegment
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: controllerPosition
+      value: 110
       objectReference: {fileID: 0}
     - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
       propertyPath: snap_points.Array.size
@@ -2462,6 +2483,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Brake
       objectReference: {fileID: 0}
+    - target: {fileID: 3352792250484556728, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.57357645
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352792250484556728, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.81915206
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352792250484556728, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 110
+      objectReference: {fileID: 0}
     - target: {fileID: 3352792251350899714, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
       propertyPath: m_Radius
       value: 0.03
@@ -2493,6 +2526,14 @@ PrefabInstance:
     - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
       propertyPath: UseAnimator
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: currentSegment
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
+      propertyPath: controllerPosition
+      value: 110
       objectReference: {fileID: 0}
     - target: {fileID: 3765030547202587564, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
       propertyPath: snap_points.Array.size
