@@ -1161,6 +1161,7 @@ Transform:
   - {fileID: 8719525644490517812}
   - {fileID: 8099829631248770955}
   - {fileID: 2589314094076804056}
+  - {fileID: 2478976954470958684}
   m_Father: {fileID: 7471242429107928341}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3653637606061223981
@@ -2241,6 +2242,96 @@ Transform:
 Transform:
   m_CorrespondingSourceObject: {fileID: 3352792250352306098, guid: 3d4b452f8bdc0f147b904dbcb53844a0, type: 3}
   m_PrefabInstance: {fileID: 2291689500425695870}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2677956739216753924
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1709449795713483089}
+    m_Modifications:
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2715829284290369424, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: m_Name
+      value: TrainsetResyncSW
+      objectReference: {fileID: 0}
+    - target: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: zengoSW1e
+      value: 
+      objectReference: {fileID: 8286426944955717593}
+    - target: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: zengoSW2e
+      value: 
+      objectReference: {fileID: 3138344976432007634}
+    - target: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: EndChangeSW1e
+      value: 
+      objectReference: {fileID: 8372782051537283962}
+    - target: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: EndChangeSW2e
+      value: 
+      objectReference: {fileID: 6388551826509589725}
+    - target: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: targetTrains.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+    - target: {fileID: 7978390035010932602, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+      propertyPath: targetTrains.Array.data[0]
+      value: 
+      objectReference: {fileID: 5586038024139767847}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+--- !u!4 &2478976954470958684 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 526106489916474200, guid: 0d641892d627ac14695687391e483bc0, type: 3}
+  m_PrefabInstance: {fileID: 2677956739216753924}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2787179168687169803
 PrefabInstance:

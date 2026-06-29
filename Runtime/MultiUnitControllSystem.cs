@@ -4,7 +4,6 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 using VRC.SDK3.UdonNetworkCalling;
-using VRC.SDKBase;
 using TMPro; //TextMeshProを扱う際に必要
 using System;//Stringに使用
 using ragecraft.UtilsScript;
