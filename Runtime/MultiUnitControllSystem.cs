@@ -8,7 +8,7 @@ using TMPro; //TextMeshProを扱う際に必要
 using System;//Stringに使用
 using ragecraft.UtilsScript;
 using frou01.GrabController;
-
+//MIT Lisence 2026 XID:kikurage1989_
 //編成の要件
 //Train_PrefabのFCouplerObjがついている方を1エンド側と定義する
 //編成の前後でFCouplerObj、BCouplerObjが揃うこと
