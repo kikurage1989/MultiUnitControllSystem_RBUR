@@ -218,16 +218,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected int isOpenRightDoorParameterID;//isOpenRightDoor
         protected int isRoomLightParameterID;//isRoomLight
 
-        //開発用仮実装
-        [Header("起動Sw　パンタグラフ等")]
-        [SerializeField] protected syncSW_Base powerEnableSW;
-        protected bool[] isPowerEnableSw = new bool[1];
-
-        [SerializeField] protected bool debug_flg;
-        [SerializeField] protected frou01.RigidBodyTrain.MortorAndWheel _MotorAndWheel;
-        protected float[] outputMortorForce = new float[1];
-        protected float[] outputBrakeForce = new float[1];
-
         protected virtual void Start()
         {
             has2Handle = Utilities.IsValid(brakeLever1e) && Utilities.IsValid(brakeLever2e);
@@ -288,12 +278,14 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             isBuzzerSw = buzzerSW.udonSyncedBool;
             isRoomLightSw = roomLightSW.udonSyncedBool;
+            
+            AddStartProcess();
 
             isInit = true;
-            //開発用仮実装
-            isPowerEnableSw = powerEnableSW.udonSyncedBool;
-            outputMortorForce = _MotorAndWheel.MortorForce;
-            outputBrakeForce = _MotorAndWheel.BrakeForce;
+        }
+        //各車追加初期設定
+        protected virtual void AddStartProcess()
+        {
         }
         
         protected virtual void Update()
@@ -516,7 +508,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         protected virtual void SwReadProcess() //スイッチ状態読み取り
         {
-            EnablePermission = isPowerEnableSw[0];
         }
 
         protected virtual void DecideNotchAndBrakePos() //速度制限やATS等の非常制動など　base.DecideNotchAndBrakePos()
@@ -528,11 +519,6 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
         protected virtual void PowerAndBrakeProcess() //これをoverrideして各車種の開発
         {
-            //Update内で実行
-            //Time.deltaTimeの値はupdateDeltaTimeに格納済
-            //開発用仮実装
-            outputMortorForce[0] = powerDirection * 10000f * notchPos;
-            outputBrakeForce[0] = (brakeSeg == 0 ? 0f : 70000f * brakeNormPos);
         }
 
         //制御車　コントローラー読み取り処理
