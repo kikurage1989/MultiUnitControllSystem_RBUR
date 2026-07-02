@@ -483,29 +483,30 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             }
 
             //Debug表示
-
-            if(Utilities.IsValid(debugText))
-            {
-                string dis_text = "";
-                dis_text += "DateDirectionMode: " + dataDirectionMode + "\n";
-                dis_text += "DateDirection: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "None") + "\n";
-                dis_text += "canReadFrom1e: " + canReadFrom1e + "\n";
-                dis_text += "canReadFrom2e: " + canReadFrom2e + "\n";
-                dis_text += "notchSegmentLocal: " + notchSegmentLocal + "\n";
-                dis_text += "brakeSegmentLocal: " + brakeSegmentLocal + "\n";
-                dis_text += "brakePositionLocal: " + brakePositionLocal + "\n";
-                dis_text += "brakeNormPosLocal: " + brakeNormPosLocal + "\n";
-                dis_text += "notchPos: " + notchPos + "\n";
-                dis_text += "brakeSeg: " + brakeSeg + "\n";
-                dis_text += "brakePos: " + brakePos + "\n";
-                dis_text += "brakeNormPos: " + brakeNormPos + "\n";
-                dis_text += "powerDirection: " + powerDirection + "\n";
-                dis_text += "FrontCheck: " + transport_bool_fromFront[0] + "\n";
-                dis_text += "BackCheck: " + transport_bool_fromBack[0] + "\n";
-                dis_text += "EnablePermission: " + EnablePermission + "\n";
-                debugText.text = dis_text;
-            }
+            if(Utilities.IsValid(debugText)) UpdateDebugText();
         }
+        protected virtual void UpdateDebugText()
+        {
+            string dis_text = "";
+            dis_text += "DateDirectionMode: " + dataDirectionMode + "\n";
+            dis_text += "DateDirection: " + (transport_bool[1] ? (!transport_bool[0] ? "1e -> 2e" : "2e -> 1e") : "None") + "\n";
+            dis_text += "canReadFrom1e: " + canReadFrom1e + "\n";
+            dis_text += "canReadFrom2e: " + canReadFrom2e + "\n";
+            dis_text += "notchSegmentLocal: " + notchSegmentLocal + "\n";
+            dis_text += "brakeSegmentLocal: " + brakeSegmentLocal + "\n";
+            dis_text += "brakePositionLocal: " + brakePositionLocal + "\n";
+            dis_text += "brakeNormPosLocal: " + brakeNormPosLocal + "\n";
+            dis_text += "notchPos: " + notchPos + "\n";
+            dis_text += "brakeSeg: " + brakeSeg + "\n";
+            dis_text += "brakePos: " + brakePos + "\n";
+            dis_text += "brakeNormPos: " + brakeNormPos + "\n";
+            dis_text += "powerDirection: " + powerDirection + "\n";
+            dis_text += "FrontCheck: " + transport_bool_fromFront[0] + "\n";
+            dis_text += "BackCheck: " + transport_bool_fromBack[0] + "\n";
+            dis_text += "EnablePermission: " + EnablePermission + "\n";
+            debugText.text = dis_text;
+        }
+
         protected virtual void SwReadProcess() //スイッチ状態読み取り
         {
         }
