@@ -5,11 +5,11 @@
   "unity": "2022.3",
   "description": "ragecraft MultiUnitControllSystem for RBUR 5",
   "vpmDependencies": {
+    "com.vrchat.worlds": ">=3.8.1",
     "com.frou01.utils": ">=7.1.1",
     "com.frou01.gac": ">=6.2.2",
     "com.frou01.wvf": ">=7.1.4",
     "com.frou01.rbur": ">=5.0.4",
-    "com.vrchat.worlds": ">=3.8.1",
     "com.kikurage1989.utilsscript": ">=1.1.0"
   },
   "author": {
