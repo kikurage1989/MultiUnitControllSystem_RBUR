@@ -1,0 +1,25 @@
+{
+  "name": "com.kikurage1989.multiunitcontrollsystem",
+  "displayName": "ragecraft.MultiUnitControllSystem",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "ragecraft MultiUnitControllSystem for RBUR 5",
+  "vpmDependencies": {
+    "com.frou01.utils": ">=7.1.1",
+    "com.frou01.gac": ">=6.2.2",
+    "com.frou01.wvf": ">=7.1.4",
+    "com.frou01.rbur": ">=5.0.4",
+    "com.vrchat.worlds": ">=3.8.1",
+    "com.kikurage1989.utilsscript": ">=1.1.0"
+  },
+  "author": {
+    "name": "kikurage1989",
+    "email": "kikurage1989.ki@gmail.com"
+  },
+  "legacyFolders": {},
+  "legacyFiles": {},
+  "unityRelease": "22f1",
+  "dependencies": {
+    "com.unity.formats.fbx": "4.2.0"
+  }
+}
