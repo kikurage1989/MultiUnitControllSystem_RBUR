@@ -26,12 +26,14 @@ using ragecraft.MultiUnitControllSystem_RBUR;
 //protected int brakeSeg ブレーキハンドルセグメント
 //protected float brakePos ブレーキハンドル角度
 //protected float brakeNormPos ブレーキハンドルのセグメント内正規化角度
-
+//protected bood isOwnerState 自身がオーナーであればTrue
+//protected float updateDeltaTime Updata()内でTime.deltaTimeの値を格納済
 
 //車両メッシュアニメーターをtrainMeshAnimatorsへ設定してください。
 //isRoomLight isOpenRightDoor isOpenLeftDoorへの送信は元クラスから送信しています。
 
 //Update()以外のUpdate系イベントはMultiUnitControllSystem内で不使用です。自由に扱ってください。
+//信号伝送に同期処理はありません。他の処理で同期が必要になるなら、自由な形式で同期してください。
 
 namespace ragecraft.MUCS_Sample
 {
@@ -80,7 +82,6 @@ namespace ragecraft.MUCS_Sample
         //PowerAndBrakeProcess()        Update内で通信が確立されていたら実行される。これをoverrideして各車種の開発
         protected override void PowerAndBrakeProcess() 
         {
-            //Time.deltaTimeの値はprotected float updateDeltaTimeに格納済
             if(isOwnerState)
             {
                 if(EnablePermission) outputMortorForce[0] = powerDirection * 10000f * notchPos;
@@ -90,8 +91,11 @@ namespace ragecraft.MUCS_Sample
             }
         }
 
-        //MARK:他transport_bool処理(運転台->後端方向のみ)
-        //他transport_bool送信
+        ////////////////////////////////////////////////////////////
+        // MARK:以下、追加でboolの送受信を行う際に処理を追加
+        // 不要ならば下記は削除して大丈夫です
+        // 他transport_bool送信(運転台->後端方向のみ)　ここから
+        ////////////////////////////////////////////////////////////
         protected override void Send_transport_bool_Others()
         {
             // transport_bool[3] = OtherBoolParameter1;
@@ -120,7 +124,7 @@ namespace ragecraft.MUCS_Sample
             //     // OtherBoolParameter5 = transport_bool_from2e[7];
             // }
         }
-        //他transport_bool変数リセット
+        //他transport_bool変数リセット 送受信不能時の処理
         protected override void Reset_transport_bool_Others()
         {
             // OtherBoolParameter1 = false;
@@ -129,5 +133,8 @@ namespace ragecraft.MUCS_Sample
             // OtherBoolParameter4 = false;
             // OtherBoolParameter5 = false;
         }
+        ////////////////////////////////////////////////////////////
+        // 他transport_bool送信(運転台->後端方向のみ) ここまで
+        ////////////////////////////////////////////////////////////
     }
 }
