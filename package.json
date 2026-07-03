@@ -1,7 +1,7 @@
 {
   "name": "com.kikurage1989.multiunitcontrollsystem",
   "displayName": "ragecraft.MultiUnitControllSystem",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "unity": "2022.3",
   "description": "ragecraft MultiUnitControllSystem for RBUR 5",
   "vpmDependencies": {
