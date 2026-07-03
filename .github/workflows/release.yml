@@ -1,0 +1,138 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # Validate Repository Configuration
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      config_package: ${{ steps.config_package.outputs.configPackage }}
+    steps:
+      - name: Validate Package Config
+        id: config_package
+        run: |
+          echo "configPackage=true" >> "$GITHUB_OUTPUT"
+
+  # Build and release the Package
+  build:
+    needs: config
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      packagePath: .
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    if: needs.config.outputs.config_package == 'true'
+
+    steps:
+      # Checkout Local Repository
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # Get package info from package.json
+      - name: Get Package Info
+        id: package_info
+        shell: bash
+        run: |
+          PACKAGE_JSON="${{ env.packagePath }}/package.json"
+
+          VERSION="$(node -p "require('./${PACKAGE_JSON}').version")"
+          JSON_PACKAGE_NAME="$(node -p "require('./${PACKAGE_JSON}').name")"
+
+          PACKAGE_NAME="${{ vars.PACKAGE_NAME }}"
+          if [ -z "$PACKAGE_NAME" ]; then
+            PACKAGE_NAME="$JSON_PACKAGE_NAME"
+          fi
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "package_name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+          echo "version=${VERSION}" >> "$GITHUB_ENV"
+          echo "packageName=${PACKAGE_NAME}" >> "$GITHUB_ENV"
+          echo "zipFile=${PACKAGE_NAME}-${VERSION}.zip" >> "$GITHUB_ENV"
+          echo "unityPackage=${PACKAGE_NAME}-${VERSION}.unitypackage" >> "$GITHUB_ENV"
+
+      # Zip the Package for release
+      - name: Create Package Zip
+        working-directory: ${{ env.packagePath }}
+        shell: bash
+        run: |
+          zip -r "${{ github.workspace }}/${{ env.zipFile }}" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "node_modules/*" \
+            -x "metaList" \
+            -x "*.zip" \
+            -x "*.unitypackage"
+
+      # Build a list of .meta files for future use
+      - name: Track Package Meta Files
+        shell: bash
+        run: |
+          find "${{ env.packagePath }}/" -name "*.meta" -type f | sed 's#^\./##' > metaList
+          echo "Meta files:"
+          cat metaList
+
+      # Make a UnityPackage version of the Package for release
+      # This replaces pCYSl5EDgo/create-unitypackage@v1.2.3
+      - name: Create UnityPackage
+        shell: bash
+        run: |
+          npm install --no-save unitypackage@1.0.8
+
+          node --input-type=module <<'NODE'
+          import create from 'unitypackage';
+          import { readFile } from 'node:fs/promises';
+
+          const metaFiles = (await readFile('metaList', 'utf8'))
+            .split(/\r\n|\n|\r/)
+            .map(line => line.trim())
+            .filter(Boolean);
+
+          if (metaFiles.length === 0) {
+            throw new Error('No .meta files found. UnityPackage cannot be created.');
+          }
+
+          await create(
+            metaFiles,
+            '.',
+            process.env.unityPackage,
+            console.log
+          );
+          NODE
+
+      # Make a release tag of the version from the package.json file
+      # This replaces rickstaa/action-create-tag
+      - name: Create Tag
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch --tags --force
+
+          if git rev-parse "refs/tags/${version}" >/dev/null 2>&1; then
+            echo "Tag ${version} already exists."
+          else
+            git tag "${version}"
+            git push origin "refs/tags/${version}"
+          fi
+
+      # Publish the Release to GitHub
+      - name: Make Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.version }}
+          name: ${{ env.version }}
+          files: |
+            ${{ env.zipFile }}
+            ${{ env.unityPackage }}
+            ${{ env.packagePath }}/package.json
+          fail_on_unmatched_files: true
+          overwrite_files: true
