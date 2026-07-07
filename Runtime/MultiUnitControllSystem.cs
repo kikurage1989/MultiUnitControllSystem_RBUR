@@ -1222,7 +1222,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             // Debug.Log("UpdateControllerEnable");
             SendCustomEventDelayedFrames(nameof(UpdateControllerEnableProcess), 1);
         }
-        public void UpdateControllerEnableProcess()
+        public virtual void UpdateControllerEnableProcess()
         {
             notchLeverColider1e.enabled = UseEnd1[0];
             notchLeverColider2e.enabled = UseEnd2[0];
