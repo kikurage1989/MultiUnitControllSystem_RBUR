@@ -523,7 +523,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         }
 
         //制御車　コントローラー読み取り処理
-        protected void ControllProcess1e()
+        protected virtual void ControllProcess1e()
         {
             notchSegmentLocal = notchSegment1e[0];
             brakeSegmentLocal = brakeSegment1e[0];
@@ -532,7 +532,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             powerDirection = reverserSegment1e[0] - 1f;
             DecideNotchAndBrakePos();
         }
-        protected void ControllProcess2e()
+        protected virtual void ControllProcess2e()
         {
             notchSegmentLocal = notchSegment2e[0];
             brakeSegmentLocal = brakeSegment2e[0];
@@ -781,22 +781,11 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             }
             //左扉
-            if(isOpenLeftDoor != prevIsOpenLeftDoor)
-            {
-                foreach(Animator _meshAnimator in trainMeshAnimators)
-                {
-                    _meshAnimator.SetBool(isOpenLeftDoorParameterID, isOpenLeftDoor);
-                }
-            }
-            prevIsOpenLeftDoor = isOpenLeftDoor;
+            DoorStateDisplayUpdate_Left();
             _doorKeySwCol1eL.enabled = isEnableKey1eL;
             _doorKeySwCol2eL.enabled = isEnableKey2eL;
             //右扉
-            if(isOpenRightDoor != prevIsOpenRightDoor)
-            {
-                foreach(Animator _meshAnimator in trainMeshAnimators) _meshAnimator.SetBool(isOpenRightDoorParameterID, isOpenRightDoor);
-            }
-            prevIsOpenRightDoor = isOpenRightDoor;
+            DoorStateDisplayUpdate_Right();
             _doorKeySwCol1eR.enabled = isEnableKey1eR;
             _doorKeySwCol2eR.enabled = isEnableKey2eR;
 
@@ -816,6 +805,23 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
             isEnableKey2eL = keySw2eL[0] || !keySw1eL[0];
             isEnableKey1eR = keySw1eR[0] || !keySw2eR[0];
             isEnableKey2eR = keySw2eR[0] || !keySw1eR[0];
+        }
+
+        protected virtual void DoorStateDisplayUpdate_Left()
+        {
+            if(isOpenLeftDoor != prevIsOpenLeftDoor)
+            {
+                foreach(Animator _meshAnimator in trainMeshAnimators) _meshAnimator.SetBool(isOpenLeftDoorParameterID, isOpenLeftDoor);
+            }
+            prevIsOpenLeftDoor = isOpenLeftDoor;
+        }
+        protected virtual void DoorStateDisplayUpdate_Right()
+        {
+            if(isOpenRightDoor != prevIsOpenRightDoor)
+            {
+                foreach(Animator _meshAnimator in trainMeshAnimators) _meshAnimator.SetBool(isOpenRightDoorParameterID, isOpenRightDoor);
+            }
+            prevIsOpenRightDoor = isOpenRightDoor;
         }
 
         //MARK:総括制御処理
