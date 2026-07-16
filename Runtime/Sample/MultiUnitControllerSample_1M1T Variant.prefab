@@ -309,6 +309,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5189047287406606982}
     - target: {fileID: 1709701053729294822, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: atsReceiver2e
+      value: 
+      objectReference: {fileID: 2910992656168256242}
+    - target: {fileID: 1709701053729294822, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
       propertyPath: isMotorized.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -504,6 +508,14 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 6866760098610280372, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+    - target: {fileID: 6894314951393837543, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6894314951393837543, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 7063808842611071764, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -588,6 +600,11 @@ PrefabInstance:
       addedObject: {fileID: 3045713023020829632}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+--- !u!65 &2910992656168256242 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 9110736816888755895, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+  m_PrefabInstance: {fileID: 6199832403038712901}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &4670955669317768789 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1646254599505207824, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}

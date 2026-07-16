@@ -14,6 +14,16 @@ using frou01.GrabController;
 //編成の前後でFCouplerObj、BCouplerObjが揃うこと
 //1ハンドル車を作成したい場合は、brakeLever1e、brakeLever2e　をNoneにすること
 
+//v1.1.0
+// virtualを追加し、override可へ
+// ・UpdateControllerEnableProcess()
+// ・ControllProcess1e()
+// ・ControllProcess2e()
+// ドア開閉表示処理（車掌Sw取扱時等イベント駆動）をprotected virtual void メソッド化しoverride可へ
+// ・DoorStateDisplayUpdate_Left()
+// ・DoorStateDisplayUpdate_Right()
+// 単車時のATS_Receiver挙動の変更（単車の場合、2エンド側ATS_Receiverのコライダーを常にDisableとし、エンド交換時に1エンド側コライダーが車体中心から180°回転するように変更）
+
 namespace ragecraft.MultiUnitControllSystem_RBUR
 {
     public class MultiUnitControllSystem : frou01.RigidBodyTrain.TrainConnectionReciever
@@ -76,8 +86,13 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
         protected bool isRoomLightSwPushedAnyCar;
         protected bool prevIsRoomLightSwPushed;
         [Header("ATS_Reciever コライダー")]
+        [Header("注：単車の場合は2エンド側のATS_Receiverは使用しません。")]
+        [Header("エンド交換時に1エンド側コライダーが車体中心から180°回転します。")]
         [SerializeField] protected Collider atsReceiver1e;
         [SerializeField] protected Collider atsReceiver2e;
+        protected bool isSingleCar;//単車フラグ　ATS_Receiverエンド交換挙動変更のため
+        protected Vector3 RotationATsReceiver1e = new Vector3(0f, 0f, 0f);
+        protected Vector3 RotationATsReceiver2e = new Vector3(0f, 180f, 0f);
 
         protected int[] notchSegment1e = new int[1];
         protected float[] notchPosition1e = new float[1];
@@ -278,6 +293,10 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
             isBuzzerSw = buzzerSW.udonSyncedBool;
             isRoomLightSw = roomLightSW.udonSyncedBool;
+
+            isSingleCar = (end1Train == end2Train);
+            // Debug.Log(this.gameObject.name + ":isSingleCar:" + isSingleCar);
+            if(isSingleCar && Utilities.IsValid(atsReceiver2e)) atsReceiver2e.enabled = false;
             
             AddStartProcess();
 
@@ -1004,7 +1023,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 dataDirectionMode = 9;
 
                 atsReceiver1e.enabled = false;
-                atsReceiver2e.enabled = false;
+                if(!isSingleCar) atsReceiver2e.enabled = false;
             }
             // [前][後]
             else if(sw1 == 2 && sw2 == 0)
@@ -1016,7 +1035,8 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_bool_fromBack[0] = true;
 
                 atsReceiver1e.enabled = true;
-                atsReceiver2e.enabled = false;
+                if(isSingleCar) atsReceiver1e.transform.localEulerAngles = RotationATsReceiver1e;
+                else atsReceiver2e.enabled = false;
             }
             // [後][前]
             else if(sw1 == 0 && sw2 == 2)
@@ -1027,8 +1047,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_bool_fromFront[0] = true;
                 transport_bool_fromBack[0] = true;
 
-                atsReceiver1e.enabled = false;
-                atsReceiver2e.enabled = true;
+                if(isSingleCar)
+                {
+                    atsReceiver1e.enabled = true;
+                    atsReceiver1e.transform.localEulerAngles = RotationATsReceiver2e;
+                }
+                else
+                {
+                    atsReceiver1e.enabled = false;
+                    atsReceiver2e.enabled = true;
+                }
             }
             // [前][中]
             else if(sw1 == 2 && sw2 == 1)
@@ -1045,9 +1073,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
                 // 2e側からBackが来ていれば、編成としてBack成立
                 transport_bool_fromBack[0] = backFrom2e;
-
-                atsReceiver1e.enabled = true;
-                atsReceiver2e.enabled = false;
+                if(isSingleCar)
+                {
+                    atsReceiver1e.enabled = true;
+                    atsReceiver1e.transform.localEulerAngles = RotationATsReceiver1e;
+                }
+                else
+                {
+                    atsReceiver1e.enabled = true;
+                    atsReceiver2e.enabled = false;
+                }
             }
             // [中][前]
             else if(sw1 == 1 && sw2 == 2)
@@ -1064,8 +1099,16 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
 
                 transport_bool_fromBack[0] = backFrom1e;
 
-                atsReceiver1e.enabled = false;
-                atsReceiver2e.enabled = true;
+                if(isSingleCar)
+                {
+                    atsReceiver1e.enabled = true;
+                    atsReceiver1e.transform.localEulerAngles = RotationATsReceiver2e;
+                }
+                else
+                {
+                    atsReceiver1e.enabled = false;
+                    atsReceiver2e.enabled = true;
+                }
             }
             // [中][後]
             else if(sw1 == 1 && sw2 == 0)
@@ -1081,7 +1124,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_bool_fromBack[3] = true;
 
                 atsReceiver1e.enabled = false;
-                atsReceiver2e.enabled = false;
+                if(!isSingleCar) atsReceiver2e.enabled = false;
             }
             // [後][中]
             else if(sw1 == 0 && sw2 == 1)
@@ -1097,7 +1140,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                 transport_bool_fromBack[4] = true;
 
                 atsReceiver1e.enabled = false;
-                atsReceiver2e.enabled = false;
+                if(!isSingleCar) atsReceiver2e.enabled = false;
             }
             // [中][中]
             else if(sw1 == 1 && sw2 == 1)
@@ -1153,7 +1196,7 @@ namespace ragecraft.MultiUnitControllSystem_RBUR
                     transport_bool[1] = false;
                 }
                 atsReceiver1e.enabled = false;
-                atsReceiver2e.enabled = false;
+                if(!isSingleCar) atsReceiver2e.enabled = false;
             }
 
             return oldMode != dataDirectionMode
