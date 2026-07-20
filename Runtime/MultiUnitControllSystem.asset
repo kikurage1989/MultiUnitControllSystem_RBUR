@@ -456,7 +456,7 @@ MonoBehaviour:
       Data: 30|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: Controller_Base, GAC_Def-udon
+      Data: frou01.GrabController.Controller_Base, GAC_Def-udon
     - Name: 
       Entry: 8
       Data: 

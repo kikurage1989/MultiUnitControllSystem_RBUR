@@ -344,6 +344,18 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 1716257212460745012, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+    - target: {fileID: 1741656240954030613, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: targetTrains.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1741656240954030613, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 1741656240954030613, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+    - target: {fileID: 1741656240954030613, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: targetTrains.Array.data[1]
+      value: 
+      objectReference: {fileID: 4670955669317768789}
     - target: {fileID: 2340316032997881374, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -592,6 +604,22 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 9008092602476197095, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+    - target: {fileID: 9159145350813169882, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 9159145350813169882, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+    - target: {fileID: 9159145350813169882, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: targetObjects.Array.size
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 9159145350813169882, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: targetObjects.Array.data[14]
+      value: 
+      objectReference: {fileID: 3380747834200701100}
+    - target: {fileID: 9159145350813169882, guid: 9d6829ba0e3c78b42ae7e399e8f78761, type: 3}
+      propertyPath: targetObjects.Array.data[15]
+      value: 
+      objectReference: {fileID: 4956022565401183994}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
